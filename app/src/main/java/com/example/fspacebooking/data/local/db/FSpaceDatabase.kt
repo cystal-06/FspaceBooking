@@ -7,22 +7,33 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.fspacebooking.data.local.converter.Converters
+import com.example.fspacebooking.data.local.dao.AuditLogDao
 import com.example.fspacebooking.data.local.dao.BookingDao
 import com.example.fspacebooking.data.local.dao.ResourceDao
 import com.example.fspacebooking.data.local.dao.TimeSlotDao
+import com.example.fspacebooking.data.local.dao.UserDao
+import com.example.fspacebooking.data.local.entity.AuditLogEntity
 import com.example.fspacebooking.data.local.entity.BookingEntity
 import com.example.fspacebooking.data.local.entity.ResourceEntity
 import com.example.fspacebooking.data.local.entity.TimeSlotEntity
+import com.example.fspacebooking.data.local.entity.UserEntity
 import com.example.fspacebooking.domain.model.ResourceStatus
 import com.example.fspacebooking.domain.model.ResourceType
+import com.example.fspacebooking.domain.model.UserRole
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Provider
 
 @Database(
-    entities = [ResourceEntity::class, BookingEntity::class, TimeSlotEntity::class],
-    version = 1,
+    entities = [
+        ResourceEntity::class, 
+        BookingEntity::class, 
+        TimeSlotEntity::class,
+        UserEntity::class,
+        AuditLogEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -30,6 +41,8 @@ abstract class FSpaceDatabase : RoomDatabase() {
     abstract fun resourceDao(): ResourceDao
     abstract fun bookingDao(): BookingDao
     abstract fun timeSlotDao(): TimeSlotDao
+    abstract fun userDao(): UserDao
+    abstract fun auditLogDao(): AuditLogDao
 
     companion object {
         private const val DATABASE_NAME = "fspace_db"
@@ -38,24 +51,99 @@ abstract class FSpaceDatabase : RoomDatabase() {
             context: Context,
             scope: CoroutineScope,
             resourceDaoProvider: Provider<ResourceDao>,
-            timeSlotDaoProvider: Provider<TimeSlotDao>
+            timeSlotDaoProvider: Provider<TimeSlotDao>,
+            userDaoProvider: Provider<UserDao>,
+            auditLogDaoProvider: Provider<AuditLogDao>
         ): FSpaceDatabase {
             return Room.databaseBuilder(
                 context.applicationContext,
                 FSpaceDatabase::class.java,
                 DATABASE_NAME
-            ).addCallback(object : Callback() {
+            )
+            .fallbackToDestructiveMigration()
+            .addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
-                    // Seed initial workspaces and time slots catalog
+                    // Seed initial workspaces, time slots, users, and audit log catalog
                     scope.launch(Dispatchers.IO) {
-                        seedInitialData(resourceDaoProvider.get(), timeSlotDaoProvider.get())
+                        seedInitialData(
+                            resourceDaoProvider.get(), 
+                            timeSlotDaoProvider.get(),
+                            userDaoProvider.get(),
+                            auditLogDaoProvider.get()
+                        )
                     }
                 }
             }).build()
         }
 
-        private suspend fun seedInitialData(resourceDao: ResourceDao, timeSlotDao: TimeSlotDao) {
+        private suspend fun seedInitialData(
+            resourceDao: ResourceDao, 
+            timeSlotDao: TimeSlotDao,
+            userDao: UserDao,
+            auditLogDao: AuditLogDao
+        ) {
+            // Seed Users (Admin, Normal Employee, Locked User, Warning User)
+            val users = listOf(
+                UserEntity(
+                    id = "user_admin",
+                    username = "admin",
+                    password = "admin123",
+                    email = "admin@fpt.com",
+                    name = "Hoàng Minh Tuấn",
+                    role = UserRole.ADMIN,
+                    employeeId = "ADM001",
+                    violations = 0,
+                    userStatus = "ĐANG HOẠT ĐỘNG",
+                    fsu = "ADM.CORP"
+                ),
+                UserEntity(
+                    id = "user_namtv",
+                    username = "employee",
+                    password = "emp123",
+                    email = "namtv@fpt.com",
+                    name = "Trần Văn Nam",
+                    role = UserRole.EMPLOYEE,
+                    employeeId = "EMP302",
+                    violations = 0,
+                    userStatus = "ĐANG HOẠT ĐỘNG",
+                    fsu = "FSU1.BU2"
+                ),
+                UserEntity(
+                    id = "user_ducbt",
+                    username = "ducbt",
+                    password = "123456",
+                    email = "ducbt@fpt.com",
+                    name = "Bùi Thế Đức",
+                    role = UserRole.EMPLOYEE,
+                    employeeId = "EMP002",
+                    violations = 4,
+                    userStatus = "ĐÃ KHÓA",
+                    fsu = "FSU2.DX"
+                ),
+                UserEntity(
+                    id = "user_maitt",
+                    username = "mai.tt",
+                    password = "123456",
+                    email = "mai.tt@fpt.com",
+                    name = "Trương Thị Mai",
+                    role = UserRole.EMPLOYEE,
+                    employeeId = "EMP114",
+                    violations = 2,
+                    userStatus = "CẢNH BÁO",
+                    fsu = "FSU1.BU9"
+                )
+            )
+            userDao.insertUsers(users)
+
+            // Seed Initial Audit Logs (UC08)
+            val initialLogs = listOf(
+                AuditLogEntity("log_1", "08:00:00", "SYS", "Khởi động hệ thống cơ sở dữ liệu F-Space Booking (Version 2)."),
+                AuditLogEntity("log_2", "08:15:30", "AUTH", "Đồng bộ thành công danh sách nhân sự FPT Software."),
+                AuditLogEntity("log_3", "08:30:00", "ADMIN", "Kích hoạt chính sách chống No-Show: Khóa sau 3 lần vắng mặt (UC12).")
+            )
+            auditLogDao.insertLogs(initialLogs)
+
             // Seed 5 Time slots
             val slots = listOf(
                 TimeSlotEntity(1, "08:00", "10:00", "Slot 1"),

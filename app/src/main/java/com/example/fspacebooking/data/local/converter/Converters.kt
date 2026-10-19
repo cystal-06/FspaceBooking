@@ -45,4 +45,14 @@ class Converters {
     fun toBookingStatus(value: String): BookingStatus {
         return BookingStatus.valueOf(value)
     }
+
+    @TypeConverter
+    fun fromUserRole(role: com.example.fspacebooking.domain.model.UserRole): String {
+        return role.name
+    }
+
+    @TypeConverter
+    fun toUserRole(value: String): com.example.fspacebooking.domain.model.UserRole {
+        return com.example.fspacebooking.domain.model.UserRole.valueOf(value)
+    }
 }

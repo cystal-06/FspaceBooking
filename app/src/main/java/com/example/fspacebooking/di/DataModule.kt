@@ -2,9 +2,11 @@ package com.example.fspacebooking.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.fspacebooking.data.local.dao.AuditLogDao
 import com.example.fspacebooking.data.local.dao.BookingDao
 import com.example.fspacebooking.data.local.dao.ResourceDao
 import com.example.fspacebooking.data.local.dao.TimeSlotDao
+import com.example.fspacebooking.data.local.dao.UserDao
 import com.example.fspacebooking.data.local.db.FSpaceDatabase
 import com.example.fspacebooking.data.remote.api.FSpaceApiService
 import com.example.fspacebooking.data.repository.AuthRepositoryImpl
@@ -77,20 +79,23 @@ object DataModule {
     fun provideApplicationScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
-
     @Provides
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
         @ApplicationScope scope: CoroutineScope,
         resourceDaoProvider: Provider<ResourceDao>,
-        timeSlotDaoProvider: Provider<TimeSlotDao>
+        timeSlotDaoProvider: Provider<TimeSlotDao>,
+        userDaoProvider: Provider<UserDao>,
+        auditLogDaoProvider: Provider<AuditLogDao>
     ): FSpaceDatabase {
         return FSpaceDatabase.buildDatabase(
             context,
             scope,
             resourceDaoProvider,
-            timeSlotDaoProvider
+            timeSlotDaoProvider,
+            userDaoProvider,
+            auditLogDaoProvider
         )
     }
 
@@ -107,6 +112,16 @@ object DataModule {
     @Provides
     fun provideTimeSlotDao(database: FSpaceDatabase): TimeSlotDao {
         return database.timeSlotDao()
+    }
+
+    @Provides
+    fun provideUserDao(database: FSpaceDatabase): UserDao {
+        return database.userDao()
+    }
+
+    @Provides
+    fun provideAuditLogDao(database: FSpaceDatabase): AuditLogDao {
+        return database.auditLogDao()
     }
 }
 

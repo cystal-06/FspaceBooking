@@ -1,6 +1,9 @@
 package com.example.fspacebooking.data.repository
 
 import android.content.SharedPreferences
+import com.example.fspacebooking.data.local.dao.AuditLogDao
+import com.example.fspacebooking.data.local.dao.UserDao
+import com.example.fspacebooking.data.local.entity.AuditLogEntity
 import com.example.fspacebooking.data.remote.api.FSpaceApiService
 import com.example.fspacebooking.data.remote.api.LoginRequest
 import com.example.fspacebooking.domain.model.User
@@ -11,13 +14,18 @@ import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val apiService: FSpaceApiService,
-    private val sharedPreferences: SharedPreferences
+    private val sharedPreferences: SharedPreferences,
+    private val userDao: UserDao,
+    private val auditLogDao: AuditLogDao
 ) : AuthRepository {
 
     private val gson = Gson()
@@ -89,16 +97,51 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun unlockUser(userId: String): Resource<Unit> {
         com.example.fspacebooking.data.local.MockDataStore.unlockUser(userId)
+        try {
+            userDao.resetViolations(userId)
+            auditLogDao.insertLog(
+                AuditLogEntity(
+                    id = "log_${System.currentTimeMillis()}",
+                    timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                    category = "ADMIN",
+                    message = "Quản trị viên đã mở khóa và đặt lại vi phạm cho tài khoản (ID: $userId).",
+                    actorId = _currentUser.value?.id ?: "admin"
+                )
+            )
+        } catch (_: Exception) {}
         return Resource.Success(Unit)
     }
 
     override suspend fun lockUser(userId: String): Resource<Unit> {
         com.example.fspacebooking.data.local.MockDataStore.lockUser(userId)
+        try {
+            userDao.updateUserStatus(userId, "ĐÃ KHÓA", 3)
+            auditLogDao.insertLog(
+                AuditLogEntity(
+                    id = "log_${System.currentTimeMillis()}",
+                    timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                    category = "ADMIN",
+                    message = "Quản trị viên đã thực hiện KHÓA tài khoản (ID: $userId) do vi phạm quy chế.",
+                    actorId = _currentUser.value?.id ?: "admin"
+                )
+            )
+        } catch (_: Exception) {}
         return Resource.Success(Unit)
     }
 
     override suspend fun sendWarningEmail(userId: String): Resource<Unit> {
         com.example.fspacebooking.data.local.MockDataStore.sendWarningEmail(userId)
+        try {
+            auditLogDao.insertLog(
+                AuditLogEntity(
+                    id = "log_${System.currentTimeMillis()}",
+                    timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                    category = "ADMIN",
+                    message = "Gửi thông báo email cảnh cáo vi phạm No-Show tới tài khoản (ID: $userId).",
+                    actorId = _currentUser.value?.id ?: "admin"
+                )
+            )
+        } catch (_: Exception) {}
         return Resource.Success(Unit)
     }
 

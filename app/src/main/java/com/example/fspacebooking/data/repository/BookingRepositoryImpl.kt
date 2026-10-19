@@ -1,6 +1,10 @@
 package com.example.fspacebooking.data.repository
 
 import com.example.fspacebooking.data.local.MockDataStore
+import com.example.fspacebooking.data.local.dao.AuditLogDao
+import com.example.fspacebooking.data.local.dao.BookingDao
+import com.example.fspacebooking.data.local.entity.AuditLogEntity
+import com.example.fspacebooking.data.local.entity.BookingEntity
 import com.example.fspacebooking.domain.model.Booking
 import com.example.fspacebooking.domain.model.BookingStatus
 import com.example.fspacebooking.domain.model.TimeSlot
@@ -14,12 +18,15 @@ import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BookingRepositoryImpl @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val bookingDao: BookingDao,
+    private val auditLogDao: AuditLogDao
 ) : BookingRepository {
 
     override suspend fun createBooking(
@@ -47,6 +54,31 @@ class BookingRepositoryImpl @Inject constructor(
         )
 
         return if (booking != null) {
+            try {
+                bookingDao.insertBooking(
+                    BookingEntity(
+                        id = booking.id,
+                        userId = booking.userId,
+                        username = booking.username,
+                        resourceId = booking.resource.id,
+                        timeSlotId = booking.timeSlot.id,
+                        date = booking.date,
+                        status = booking.status,
+                        purpose = booking.purpose,
+                        qrCode = "QR_${booking.id}_${booking.resource.id}",
+                        createdAt = booking.createdAt
+                    )
+                )
+                auditLogDao.insertLog(
+                    AuditLogEntity(
+                        id = "log_${System.currentTimeMillis()}",
+                        timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                        category = "BOOKING",
+                        message = "Người dùng '${currentUser.name}' đặt thành công '${booking.resource.name}' (${booking.date} [${booking.timeSlot.startTime}-${booking.timeSlot.endTime}]).",
+                        actorId = currentUser.id
+                    )
+                )
+            } catch (_: Exception) {}
             Resource.Success(booking)
         } else {
             Resource.Error("Không thể thực hiện đặt chỗ. Khung giờ này có thể đã bị chiếm hoặc tài khoản bị giới hạn.")
@@ -56,7 +88,21 @@ class BookingRepositoryImpl @Inject constructor(
     override suspend fun checkInBooking(bookingId: String, qrCode: String): Resource<Booking> {
         val result = MockDataStore.checkInBooking(bookingId, qrCode)
         return if (result.isSuccess) {
-            Resource.Success(result.getOrThrow())
+            val booking = result.getOrThrow()
+            val nowTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+            try {
+                bookingDao.checkInBooking(bookingId, BookingStatus.CHECKED_IN, nowTime)
+                auditLogDao.insertLog(
+                    AuditLogEntity(
+                        id = "log_${System.currentTimeMillis()}",
+                        timestamp = nowTime,
+                        category = "CHECKIN",
+                        message = "Quét mã QR Check-in thành công cho phòng '${booking.resource.name}' (Mã: $bookingId).",
+                        actorId = booking.userId
+                    )
+                )
+            } catch (_: Exception) {}
+            Resource.Success(booking)
         } else {
             Resource.Error(result.exceptionOrNull()?.message ?: "Check-in không thành công.")
         }
@@ -64,6 +110,17 @@ class BookingRepositoryImpl @Inject constructor(
 
     override suspend fun cancelBooking(bookingId: String): Resource<Unit> {
         MockDataStore.cancelBooking(bookingId)
+        try {
+            bookingDao.updateBookingStatus(bookingId, BookingStatus.CANCELLED)
+            auditLogDao.insertLog(
+                AuditLogEntity(
+                    id = "log_${System.currentTimeMillis()}",
+                    timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                    category = "BOOKING",
+                    message = "Hủy lịch đặt chỗ thành công (Mã: $bookingId)."
+                )
+            )
+        } catch (_: Exception) {}
         return Resource.Success(Unit)
     }
 
