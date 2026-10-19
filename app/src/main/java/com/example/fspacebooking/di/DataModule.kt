@@ -1,0 +1,134 @@
+package com.example.fspacebooking.di
+
+import android.content.Context
+import android.content.SharedPreferences
+import com.example.fspacebooking.data.local.dao.BookingDao
+import com.example.fspacebooking.data.local.dao.ResourceDao
+import com.example.fspacebooking.data.local.dao.TimeSlotDao
+import com.example.fspacebooking.data.local.db.FSpaceDatabase
+import com.example.fspacebooking.data.remote.api.FSpaceApiService
+import com.example.fspacebooking.data.repository.AuthRepositoryImpl
+import com.example.fspacebooking.data.repository.BookingRepositoryImpl
+import com.example.fspacebooking.data.repository.ResourceRepositoryImpl
+import com.example.fspacebooking.domain.repository.AuthRepository
+import com.example.fspacebooking.domain.repository.BookingRepository
+import com.example.fspacebooking.domain.repository.ResourceRepository
+import dagger.Binds
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Provider
+import javax.inject.Qualifier
+import javax.inject.Singleton
+
+@Retention(AnnotationRetention.BINARY)
+@Qualifier
+annotation class ApplicationScope
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DataModule {
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        return OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://fspace-office.fpt.com/api/") // Production F-Town workspace API base url
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFSpaceApiService(retrofit: Retrofit): FSpaceApiService {
+        return retrofit.create(FSpaceApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("fspace_booking_preferences", Context.MODE_PRIVATE)
+    }
+
+    @Provides
+    @Singleton
+    @ApplicationScope
+    fun provideApplicationScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        @ApplicationScope scope: CoroutineScope,
+        resourceDaoProvider: Provider<ResourceDao>,
+        timeSlotDaoProvider: Provider<TimeSlotDao>
+    ): FSpaceDatabase {
+        return FSpaceDatabase.buildDatabase(
+            context,
+            scope,
+            resourceDaoProvider,
+            timeSlotDaoProvider
+        )
+    }
+
+    @Provides
+    fun provideResourceDao(database: FSpaceDatabase): ResourceDao {
+        return database.resourceDao()
+    }
+
+    @Provides
+    fun provideBookingDao(database: FSpaceDatabase): BookingDao {
+        return database.bookingDao()
+    }
+
+    @Provides
+    fun provideTimeSlotDao(database: FSpaceDatabase): TimeSlotDao {
+        return database.timeSlotDao()
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindResourceRepository(
+        impl: ResourceRepositoryImpl
+    ): ResourceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBookingRepository(
+        impl: BookingRepositoryImpl
+    ): BookingRepository
+}
