@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Schedule
@@ -58,14 +59,24 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.text.style.TextOverflow
+import com.example.fspacebooking.ui.components.AmenityChip
+import com.example.fspacebooking.ui.components.ModernSegmentedControl
+import com.example.fspacebooking.ui.components.StatusBadge
+import com.example.fspacebooking.ui.theme.AppBackground
+import com.example.fspacebooking.ui.theme.AppBorder
+import com.example.fspacebooking.ui.theme.AppBorderSubtle
+import com.example.fspacebooking.ui.theme.AppCardSurface
+import com.example.fspacebooking.ui.theme.AppTextMuted
+import com.example.fspacebooking.ui.theme.AppTextPrimary
+import com.example.fspacebooking.ui.theme.AppTextSecondary
+import com.example.fspacebooking.ui.theme.FptBlue
+import com.example.fspacebooking.ui.theme.FptEmerald
+import com.example.fspacebooking.ui.theme.FptRose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -192,70 +203,44 @@ fun ResourceSearchScreen(
                 .background(backgroundLight)
                 .padding(innerPadding)
         ) {
-            // Tab Row transition smooth with animateColorAsState
-            val roomTabColor by animateColorAsState(
-                targetValue = if (currentTabIndex == 0) primaryColor else Color(0xFF64748B),
-                animationSpec = tween(durationMillis = 250), label = "roomTab"
-            )
-            val deskTabColor by animateColorAsState(
-                targetValue = if (currentTabIndex == 1) primaryColor else Color(0xFF64748B),
-                animationSpec = tween(durationMillis = 250), label = "deskTab"
+            // Modern Segmented Control for Space Type
+            ModernSegmentedControl(
+                items = listOf("Phòng Họp", "Bàn Làm Việc"),
+                selectedIndex = currentTabIndex,
+                onSelect = { index ->
+                    viewModel.onTypeSelect(if (index == 0) ResourceType.ROOM else ResourceType.DESK)
+                },
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
             )
 
-            TabRow(
-                selectedTabIndex = currentTabIndex,
-                containerColor = backgroundLight,
-                contentColor = primaryColor,
-                divider = { Spacer(modifier = Modifier.height(1.dp).background(Color(0xFFE2E8F0))) },
-                indicator = { tabPositions ->
-                    if (currentTabIndex < tabPositions.size) {
-                        TabRowDefaults.SecondaryIndicator(
-                            Modifier.tabIndicatorOffset(tabPositions[currentTabIndex]),
-                            color = primaryColor
-                        )
-                    }
-                }
-            ) {
-                Tab(
-                    selected = currentTabIndex == 0,
-                    onClick = { viewModel.onTypeSelect(ResourceType.ROOM) },
-                    text = { Text("Phòng Họp", fontWeight = FontWeight.Bold, color = roomTabColor) }
-                )
-                Tab(
-                    selected = currentTabIndex == 1,
-                    onClick = { viewModel.onTypeSelect(ResourceType.DESK) },
-                    text = { Text("Bàn Làm Việc", fontWeight = FontWeight.Bold, color = deskTabColor) }
-                )
-            }
-
-            // Search Bar: CircleShape, leading search icon, trailing clear icon, filters as types
+            // Search Bar: Modern rounded outline with clear icon
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.onSearchQueryChange(it) },
-                placeholder = { Text("Tìm kiếm tên phòng, bàn làm việc...", color = Color(0xFF94A3B8), fontSize = 14.sp) },
+                placeholder = { Text("Tìm kiếm phòng họp, bàn làm việc, tầng...", color = AppTextMuted, fontSize = 14.sp) },
                 leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color(0xFF64748B), modifier = Modifier.size(20.dp))
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = AppTextSecondary, modifier = Modifier.size(20.dp))
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                            Icon(imageVector = Icons.Default.Close, contentDescription = "Xóa tìm kiếm", tint = Color(0xFF64748B), modifier = Modifier.size(18.dp))
+                            Icon(imageVector = Icons.Default.Close, contentDescription = "Xóa tìm kiếm", tint = AppTextSecondary, modifier = Modifier.size(18.dp))
                         }
                     }
                 },
-                shape = CircleShape,
+                shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = primaryColor,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedTextColor = Color(0xFF1E293B),
-                    unfocusedTextColor = Color(0xFF1E293B)
+                    focusedBorderColor = FptBlue,
+                    unfocusedBorderColor = AppBorder,
+                    focusedContainerColor = AppCardSurface,
+                    unfocusedContainerColor = AppCardSurface,
+                    focusedTextColor = AppTextPrimary,
+                    unfocusedTextColor = AppTextPrimary
                 ),
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
             )
 
             // Animated Filter blocks
@@ -437,11 +422,7 @@ fun ResourceSearchScreen(
                                     ResourceItemCard(
                                         resource = resource,
                                         onToggleFavorite = { viewModel.toggleFavorite(resource.id, !resource.isFavorite) },
-                                        onBookClick = {
-                                            selectedResourceForBooking = resource
-                                            selectedSheetSlotId = 1 // default slot
-                                            showBottomSheet = true
-                                        },
+                                        onBookClick = { onResourceSelect(resource.id) },
                                         onCardClick = { onResourceSelect(resource.id) }
                                     )
                                 }
@@ -665,34 +646,14 @@ fun ResourceItemCard(
     onBookClick: () -> Unit,
     onCardClick: () -> Unit
 ) {
-    // Elegant pill badges
-    val statusBg = when (resource.status) {
-        ResourceStatus.AVAILABLE -> Color(0xFFDCFCE7) // soft light green
-        ResourceStatus.BOOKED -> Color(0xFFFEE2E2) // soft pink
-        ResourceStatus.MAINTENANCE -> Color(0xFFF1F5F9) // soft gray
-    }
-    val statusText = when (resource.status) {
-        ResourceStatus.AVAILABLE -> Color(0xFF16A34A) // dark green
-        ResourceStatus.BOOKED -> Color(0xFFDC2626) // dark red
-        ResourceStatus.MAINTENANCE -> Color(0xFF475569) // dark gray
-    }
-    val statusLabel = when (resource.status) {
-        ResourceStatus.AVAILABLE -> "Trống"
-        ResourceStatus.BOOKED -> "Đã đặt"
-        ResourceStatus.MAINTENANCE -> "Bảo trì"
-    }
-
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(width = 1.dp, color = Color(0xFFE2E8F0)),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp,
-            hoveredElevation = 4.dp
-        ),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+        border = BorderStroke(width = 1.dp, color = AppBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 6.dp)
+            .padding(horizontal = 20.dp, vertical = 6.dp)
             .clickable { onCardClick() }
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -707,40 +668,42 @@ fun ResourceItemCard(
                     ) {
                         Text(
                             text = resource.name,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color(0xFF1E293B)
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            ),
+                            color = AppTextPrimary
                         )
-                        // Pill badge custom layout
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(statusBg)
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = statusLabel,
-                                color = statusText,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                fontSize = 10.sp
-                            )
-                        }
+                        StatusBadge(status = resource.status)
                     }
-                    Text(
-                        text = "${resource.building} • ${resource.floor}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF64748B),
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = AppTextSecondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "${resource.building} • ${resource.floor}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = AppTextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
 
                 IconButton(
                     onClick = onToggleFavorite,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
                         imageVector = if (resource.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = null,
-                        tint = if (resource.isFavorite) Color(0xFFEF4444) else Color(0xFF94A3B8),
+                        tint = if (resource.isFavorite) FptRose else AppTextMuted,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -748,12 +711,14 @@ fun ResourceItemCard(
 
             Text(
                 text = resource.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF475569),
-                modifier = Modifier.padding(vertical = 12.dp)
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                color = AppTextSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(vertical = 10.dp)
             )
 
-            // Amenities outline chips using AssistChip
+            // Amenities outline chips using custom AmenityChip
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -761,45 +726,25 @@ fun ResourceItemCard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Capacity chip
-                AssistChip(
-                    onClick = { },
-                    label = { Text("${resource.capacity} Chỗ ngồi", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
-                    leadingIcon = {
-                        Icon(imageVector = Icons.Default.People, contentDescription = null, modifier = Modifier.size(12.dp))
-                    },
-                    colors = AssistChipDefaults.assistChipColors(
-                        labelColor = Color(0xFF2563EB),
-                        leadingIconContentColor = Color(0xFF2563EB)
-                    ),
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = Color(0xFFDCFCE7).copy(alpha = 0.5f)
-                    )
+                AmenityChip(
+                    name = "${resource.capacity} Chỗ ngồi",
+                    icon = Icons.Default.People,
+                    highlight = true
                 )
 
                 resource.amenities.forEach { amenity ->
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(amenity, fontSize = 10.sp, fontWeight = FontWeight.Medium) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            labelColor = Color(0xFF475569)
-                        ),
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = Color(0xFFE2E8F0)
-                        )
-                    )
+                    AmenityChip(name = amenity)
                 }
             }
 
-            // Wide bold primary Book button
+            // Primary Book button
             FButton(
-                text = if (resource.status == ResourceStatus.MAINTENANCE) "Bảo trì" else "Đặt ngay",
+                text = if (resource.status == ResourceStatus.MAINTENANCE) "Đang bảo trì" else "Đặt ngay",
                 onClick = onBookClick,
                 enabled = resource.status != ResourceStatus.MAINTENANCE,
                 modifier = Modifier.fillMaxWidth(),
-                isSecondary = resource.status == ResourceStatus.BOOKED
+                isSecondary = resource.status == ResourceStatus.BOOKED,
+                leadingIcon = Icons.Default.CalendarToday
             )
         }
     }

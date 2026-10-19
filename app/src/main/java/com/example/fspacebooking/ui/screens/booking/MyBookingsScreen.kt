@@ -51,8 +51,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.text.style.TextAlign
+import com.example.fspacebooking.ui.components.BookingStatusBadge
 import com.example.fspacebooking.ui.components.FTextField
+import com.example.fspacebooking.ui.theme.AppBackground
+import com.example.fspacebooking.ui.theme.AppBorder
+import com.example.fspacebooking.ui.theme.AppBorderSubtle
+import com.example.fspacebooking.ui.theme.AppCardSurface
+import com.example.fspacebooking.ui.theme.AppTextMuted
+import com.example.fspacebooking.ui.theme.AppTextPrimary
+import com.example.fspacebooking.ui.theme.AppTextSecondary
+import com.example.fspacebooking.ui.theme.FptBlue
+import com.example.fspacebooking.ui.theme.FptBlueLight
+import com.example.fspacebooking.ui.theme.FptEmerald
+import com.example.fspacebooking.ui.theme.FptOrange
+import com.example.fspacebooking.ui.theme.FptRose
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -157,8 +170,8 @@ fun MyBookingsScreen(
 
                     // Section 1: Horizontal Scrollable Calendar View strip
                     LazyRow(
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         items(calendarDays) { date ->
@@ -167,32 +180,33 @@ fun MyBookingsScreen(
                             val dayName = sdfDayName.format(date)
                             val dayNum = sdfDayNum.format(date)
 
-                            // Check if this date has any confirmed active bookings
                             val hasBooking = allBookings.any { it.date == dateStr && it.status == BookingStatus.CONFIRMED }
 
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
+                                    .width(54.dp)
                                     .clip(RoundedCornerShape(14.dp))
-                                    .background(if (isSelected) primaryColor else cardSurface)
+                                    .background(if (isSelected) FptBlue else AppCardSurface)
                                     .border(
                                         width = 1.dp,
-                                        color = if (isSelected) Color.Transparent else Color(0xFFE2E8F0),
+                                        color = if (isSelected) Color.Transparent else AppBorder,
                                         shape = RoundedCornerShape(14.dp)
                                     )
                                     .clickable { selectedCalendarDate = dateStr }
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    .padding(vertical = 12.dp)
                             ) {
                                 Text(
                                     text = dayName.uppercase(),
-                                    color = if (isSelected) Color.White else Color(0xFF94A3B8),
-                                    fontSize = 10.sp,
+                                    color = if (isSelected) Color.White.copy(alpha = 0.8f) else AppTextMuted,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = dayNum,
-                                    color = if (isSelected) Color.White else Color(0xFF1E293B),
-                                    fontSize = 18.sp,
+                                    color = if (isSelected) Color.White else AppTextPrimary,
+                                    fontSize = 17.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 )
                                 
@@ -200,12 +214,10 @@ fun MyBookingsScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Box(
                                         modifier = Modifier
-                                            .size(6.dp)
+                                            .size(5.dp)
                                             .clip(CircleShape)
-                                            .background(if (isSelected) Color.White else Color(0xFFEF4444))
+                                            .background(if (isSelected) Color.White else FptOrange)
                                     )
-                                } else {
-                                    Spacer(modifier = Modifier.height(10.dp))
                                 }
                             }
                         }
@@ -585,19 +597,16 @@ fun BookingAgendaCard(
     onCheckInClick: () -> Unit
 ) {
     val alphaModifier = if (isPastOrCancelled) Modifier.alpha(0.6f) else Modifier
-    val primaryColor = Color(0xFF2563EB)
-    val cardSurface = Color(0xFFFFFFFF)
-
     val isAlreadyCheckedIn = booking.status == BookingStatus.CHECKED_IN || isCheckedIn
 
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardSurface),
-        border = BorderStroke(width = 1.dp, color = Color(0xFFE2E8F0)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+        border = BorderStroke(width = 1.dp, color = AppBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 6.dp)
+            .padding(horizontal = 20.dp, vertical = 6.dp)
             .then(alphaModifier)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -607,20 +616,22 @@ fun BookingAgendaCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(primaryColor.copy(alpha = 0.1f)),
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (booking.resource.type == ResourceType.ROOM) FptBlueLight else Color(0xFFFFF7ED)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = if (booking.resource.type == ResourceType.ROOM) Icons.Default.MeetingRoom else Icons.Default.LaptopMac,
                         contentDescription = null,
-                        tint = primaryColor,
-                        modifier = Modifier.size(22.dp)
+                        tint = if (booking.resource.type == ResourceType.ROOM) FptBlue else Color(0xFFEA580C),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
@@ -630,47 +641,25 @@ fun BookingAgendaCard(
                         Text(
                             text = booking.resource.name,
                             fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF1E293B)
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                            color = AppTextPrimary
                         )
                         
-                        // Accurate Status Badges (UC04, UC05, UC12)
-                        val (badgeLabel, badgeBg, badgeText) = when (booking.status) {
-                            BookingStatus.CHECKED_IN -> Triple("Đã Check-in", Color(0xFFDCFCE7), Color(0xFF16A34A))
-                            BookingStatus.NO_SHOW -> Triple("No-show", Color(0xFFFEF3C7), Color(0xFFD97706))
-                            BookingStatus.CANCELLED -> Triple("Đã hủy", Color(0xFFFEF2F2), Color(0xFFEF4444))
-                            BookingStatus.CONFIRMED -> {
-                                if (isAlreadyCheckedIn) Triple("Đã Check-in", Color(0xFFDCFCE7), Color(0xFF16A34A))
-                                else Triple("Đã xác nhận", Color(0xFFEFF6FF), Color(0xFF2563EB))
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(badgeBg)
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = badgeLabel,
-                                color = badgeText,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                fontSize = 10.sp
-                            )
-                        }
+                        val displayStatus = if (isAlreadyCheckedIn) BookingStatus.CHECKED_IN else booking.status
+                        BookingStatusBadge(status = displayStatus)
                     }
                     Text(
                         text = "${booking.resource.building} • ${booking.resource.floor} • Khung giờ: ${booking.timeSlot.startTime} - ${booking.timeSlot.endTime}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF64748B),
-                        modifier = Modifier.padding(top = 2.dp)
+                        color = AppTextSecondary,
+                        modifier = Modifier.padding(top = 3.dp)
                     )
                     if (booking.purpose.isNotBlank()) {
                         Text(
                             text = "Mục đích: ${booking.purpose}",
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFF475569),
-                            modifier = Modifier.padding(top = 2.dp),
+                            modifier = Modifier.padding(top = 3.dp),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -678,7 +667,7 @@ fun BookingAgendaCard(
             }
 
             if (!isPastOrCancelled) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -686,37 +675,46 @@ fun BookingAgendaCard(
                 ) {
                     if (isToday) {
                         if (isAlreadyCheckedIn) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF10B981), modifier = Modifier.size(18.dp))
-                                Text(" Đã Check-in", fontSize = 11.sp, color = Color(0xFF10B981), fontWeight = FontWeight.Bold)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color(0xFFDCFCE7))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = FptEmerald, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Đã Check-in", fontSize = 12.sp, color = FptEmerald, fontWeight = FontWeight.Bold)
                             }
                         } else {
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(primaryColor)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(FptBlue)
                                     .clickable { onCheckInClick() }
                                     .padding(horizontal = 14.dp, vertical = 8.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(imageVector = Icons.Default.QrCodeScanner, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
-                                    Text(" Check-in QR", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Icon(imageVector = Icons.Default.QrCodeScanner, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Check-in QR", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                     }
 
-                    // Cancel - only allowed if not checked-in yet
+                    // Cancel button
                     if (!isAlreadyCheckedIn) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(14.dp))
-                                .border(1.dp, Color(0xFFEF4444), RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(1.dp, Color(0xFFFCA5A5), RoundedCornerShape(12.dp))
+                                .background(Color(0xFFFEF2F2))
                                 .clickable { onCancelClick() }
                                 .padding(horizontal = 14.dp, vertical = 8.dp)
                         ) {
-                            Text("Hủy lịch", color = Color(0xFFEF4444), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text("Hủy lịch", color = FptRose, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

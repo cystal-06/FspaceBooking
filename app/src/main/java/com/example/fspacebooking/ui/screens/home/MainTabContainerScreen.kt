@@ -38,6 +38,14 @@ import com.example.fspacebooking.ui.viewmodels.HomeViewModel
 import com.example.fspacebooking.ui.viewmodels.MyBookingsViewModel
 import com.example.fspacebooking.ui.viewmodels.SearchViewModel
 
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import com.example.fspacebooking.ui.theme.AppBorder
+import com.example.fspacebooking.ui.theme.AppCardSurface
+import com.example.fspacebooking.ui.theme.AppTextSecondary
+import com.example.fspacebooking.ui.theme.FptBlue
+import com.example.fspacebooking.ui.theme.FptBlueLight
+
 @Composable
 fun MainTabContainerScreen(
     homeViewModel: HomeViewModel,
@@ -61,26 +69,44 @@ fun MainTabContainerScreen(
         TabItem("Cá nhân", Icons.Default.Person)
     )
 
-    val primaryColor = Color(0xFF2563EB)
-
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
-                tonalElevation = 8.dp
+                containerColor = AppCardSurface,
+                tonalElevation = 0.dp,
+                modifier = Modifier.drawBehind {
+                    drawLine(
+                        color = AppBorder,
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, 0f),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
             ) {
                 tabsList.forEachIndexed { index, tab ->
+                    val isSelected = activeTabIndex == index
                     NavigationBarItem(
-                        selected = activeTabIndex == index,
+                        selected = isSelected,
                         onClick = { activeTabIndex = index },
-                        icon = { Icon(imageVector = tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label, fontWeight = FontWeight.Bold, fontSize = 10.sp) },
+                        icon = { 
+                            Icon(
+                                imageVector = tab.icon, 
+                                contentDescription = tab.label
+                            ) 
+                        },
+                        label = { 
+                            Text(
+                                text = tab.label, 
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium, 
+                                fontSize = 11.sp
+                            ) 
+                        },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = primaryColor,
-                            selectedTextColor = primaryColor,
-                            indicatorColor = primaryColor.copy(alpha = 0.1f),
-                            unselectedIconColor = Color(0xFF64748B),
-                            unselectedTextColor = Color(0xFF64748B)
+                            selectedIconColor = FptBlue,
+                            selectedTextColor = FptBlue,
+                            indicatorColor = FptBlueLight,
+                            unselectedIconColor = AppTextSecondary,
+                            unselectedTextColor = AppTextSecondary
                         )
                     )
                 }

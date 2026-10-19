@@ -1,8 +1,5 @@
 package com.example.fspacebooking.ui.screens.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,13 +22,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LaptopMac
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MeetingRoom
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,17 +44,33 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fspacebooking.domain.model.ResourceType
 import com.example.fspacebooking.domain.model.UserRole
+import com.example.fspacebooking.ui.components.AmenityChip
+import com.example.fspacebooking.ui.components.BookingStatusBadge
+import com.example.fspacebooking.ui.components.FButton
 import com.example.fspacebooking.ui.components.FCard
-import com.example.fspacebooking.ui.components.StatusBadge
+import com.example.fspacebooking.ui.theme.AppBackground
+import com.example.fspacebooking.ui.theme.AppBorder
+import com.example.fspacebooking.ui.theme.AppBorderSubtle
+import com.example.fspacebooking.ui.theme.AppCardSurface
+import com.example.fspacebooking.ui.theme.AppTextMuted
+import com.example.fspacebooking.ui.theme.AppTextPrimary
+import com.example.fspacebooking.ui.theme.AppTextSecondary
+import com.example.fspacebooking.ui.theme.FptAmber
+import com.example.fspacebooking.ui.theme.FptBlue
+import com.example.fspacebooking.ui.theme.FptBlueLight
+import com.example.fspacebooking.ui.theme.FptEmerald
+import com.example.fspacebooking.ui.theme.FptOrange
+import com.example.fspacebooking.ui.theme.FptOrangeLight
+import com.example.fspacebooking.ui.theme.FptRose
 import com.example.fspacebooking.ui.viewmodels.HomeViewModel
 import com.example.fspacebooking.utils.Resource
 
@@ -73,182 +88,261 @@ fun HomeScreen(
     val todayBookingsState by viewModel.todayBookings.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
 
-    val primaryColor = Color(0xFF2563EB)
-    val backgroundLight = Color(0xFFF8FAFC)
-    val cardSurface = Color(0xFFFFFFFF)
-
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(backgroundLight)
+            .background(AppBackground)
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(bottom = 24.dp),
+            contentPadding = PaddingValues(bottom = 28.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 20.dp)
         ) {
-            // Profile & Greeting Header (Minimalist & Crisp)
+            // Enterprise Header: Avatar + User Info + Role + Logout
             item {
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column {
-                        val greetingText = when (currentUser?.role) {
-                            UserRole.ADMIN -> "Xin chào, Quản trị viên"
-                            else -> "Chào buổi sáng"
-                        }
-                        Text(
-                            text = greetingText,
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF64748B)
-                            )
-                        )
-                        Text(
-                            text = "${currentUser?.name ?: "Đức Nguyễn"} 👋",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = (-0.5).sp,
-                                color = Color(0xFF1E293B)
-                            )
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 4.dp)
-                        ) {
-                            Text(
-                                text = "FPT Software campus • ${currentUser?.employeeId ?: "EMP888"}",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    color = Color(0xFF64748B)
-                                )
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // User Avatar with status dot
+                        Box(contentAlignment = Alignment.BottomEnd) {
+                            val initial = currentUser?.name?.take(1)?.uppercase() ?: "Đ"
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(primaryColor.copy(alpha = 0.1f))
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(FptBlue, Color(0xFF60A5FA))
+                                        )
+                                    ),
+                                contentAlignment = Alignment.Center
                             ) {
-                                val roleLabel = when (currentUser?.role) {
-                                    UserRole.ADMIN -> "Quản trị viên"
-                                    else -> "Nhân viên"
-                                }
                                 Text(
-                                    text = roleLabel,
-                                    color = primaryColor,
-                                    fontSize = 10.sp,
+                                    text = initial,
+                                    color = Color.White,
+                                    fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold
                                 )
+                            }
+                            // Active status dot
+                            Box(
+                                modifier = Modifier
+                                    .size(13.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .padding(2.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(CircleShape)
+                                        .background(FptEmerald)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column {
+                            val greetingText = when (currentUser?.role) {
+                                UserRole.ADMIN -> "Xin chào, Quản trị viên"
+                                else -> "Chào buổi sáng"
+                            }
+                            Text(
+                                text = greetingText,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = AppTextSecondary,
+                                    fontSize = 12.sp
+                                )
+                            )
+                            Text(
+                                text = "${currentUser?.name ?: "Đức Nguyễn"} 👋",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 18.sp,
+                                    color = AppTextPrimary
+                                )
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 2.dp)
+                            ) {
+                                Text(
+                                    text = "FPT Campus • ${currentUser?.employeeId ?: "EMP888"}",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = AppTextSecondary,
+                                        fontSize = 11.sp
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(FptBlueLight)
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    val roleLabel = when (currentUser?.role) {
+                                        UserRole.ADMIN -> "Quản trị viên"
+                                        else -> "Nhân viên"
+                                    }
+                                    Text(
+                                        text = roleLabel,
+                                        color = FptBlue,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
 
-                    // Top Bar Actions
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        IconButton(
-                            onClick = onLogout,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(Color.White)
-                                .border(1.dp, Color(0xFFE2E8F0), CircleShape)
-                                .size(42.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Logout,
-                                contentDescription = "Logout",
-                                tint = Color(0xFFEF4444),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                    // Logout Icon Button
+                    IconButton(
+                        onClick = onLogout,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(AppCardSurface)
+                            .border(1.dp, AppBorder, RoundedCornerShape(12.dp))
+                            .size(42.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "Logout",
+                            tint = FptRose,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
-            // Hero Card (Sự kiện sắp diễn ra - Reactive Upcoming Card)
+            // Hero Card (Upcoming Booking or Quick CTA)
             item {
                 val activeBookings = (todayBookingsState as? Resource.Success)?.data ?: emptyList()
                 val upcomingBooking = activeBookings.firstOrNull()
 
                 Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = primaryColor),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 2.dp
-                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = FptBlue),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(16.dp),
-                            clip = false
-                        )
                         .padding(bottom = 24.dp)
                 ) {
                     Box(
                         modifier = Modifier
                             .background(
                                 Brush.linearGradient(
-                                    colors = listOf(primaryColor, Color(0xFF3B82F6))
+                                    colors = listOf(FptBlue, Color(0xFF1E40AF))
                                 )
                             )
                             .fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(24.dp)) {
+                        Column(modifier = Modifier.padding(20.dp)) {
                             if (upcomingBooking != null) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color.White.copy(alpha = 0.2f))
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    ) {
+                                        Text(
+                                            text = "LỊCH HỌP SẮP DIỄN RA",
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = FontWeight.ExtraBold,
+                                                letterSpacing = 0.8.sp,
+                                                fontSize = 10.sp
+                                            ),
+                                            color = Color.White
+                                        )
+                                    }
+                                    Text(
+                                        text = "Hôm nay",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "LỊCH HỌP SẮP DIỄN RA",
-                                    style = MaterialTheme.typography.labelSmall.copy(
+                                    text = upcomingBooking.resource.name,
+                                    style = MaterialTheme.typography.titleLarge.copy(
                                         fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
-                                    ),
-                                    color = Color.White.copy(alpha = 0.8f)
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = "Bạn có lịch họp tại ${upcomingBooking.resource.name} (${upcomingBooking.resource.floor} • ${upcomingBooking.resource.building})",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        lineHeight = 22.sp
+                                        fontSize = 19.sp,
+                                        lineHeight = 24.sp
                                     ),
                                     color = Color.White
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = "Thời gian: ${upcomingBooking.timeSlot.startTime} - ${upcomingBooking.timeSlot.endTime} (Hôm nay)",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.9f)
-                                )
-                                Spacer(modifier = Modifier.height(20.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.LocationOn,
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.85f),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "${upcomingBooking.resource.building} • ${upcomingBooking.resource.floor}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.White.copy(alpha = 0.9f)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        imageVector = Icons.Default.AccessTime,
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.85f),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "${upcomingBooking.timeSlot.startTime} - ${upcomingBooking.timeSlot.endTime}",
+                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.White
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(18.dp))
                                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(20.dp))
+                                            .clip(RoundedCornerShape(12.dp))
                                             .background(Color.White)
                                             .clickable { onNavigateToBooking(upcomingBooking.resource.id) }
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                            .padding(horizontal = 16.dp, vertical = 9.dp)
                                     ) {
                                         Text(
                                             text = "Xem chi tiết",
-                                            color = primaryColor,
+                                            color = FptBlue,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
                                     Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(20.dp))
-                                            .border(1.dp, Color.White, RoundedCornerShape(20.dp))
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                                             .clickable { viewModel.cancelBooking(upcomingBooking.id) }
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                            .padding(horizontal = 16.dp, vertical = 9.dp)
                                     ) {
                                         Text(
-                                            text = "Hủy lịch đặt",
+                                            text = "Hủy lịch",
                                             color = Color.White,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
@@ -256,33 +350,50 @@ fun HomeScreen(
                                     }
                                 }
                             } else {
-                                // Elegant empty state inside upcoming card
-                                Text(
-                                    text = "KHÔNG CÓ LỊCH HỌP SẮP DIỄN RA",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
-                                    ),
-                                    color = Color.White.copy(alpha = 0.8f)
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = "Hôm nay bạn chưa đặt phòng họp hay vị trí làm việc nào.",
-                                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                                    color = Color.White.copy(alpha = 0.9f)
-                                )
-                                Spacer(modifier = Modifier.height(20.dp))
+                                // Elegant empty state
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(20.dp))
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(Color.White.copy(alpha = 0.2f))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = "KHÔNG CÓ LỊCH HỌP SẮP TỚI",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            letterSpacing = 0.8.sp,
+                                            fontSize = 10.sp
+                                        ),
+                                        color = Color.White
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "Bạn chưa có lịch đặt chỗ hôm nay",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 17.sp
+                                    ),
+                                    color = Color.White
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Khám phá phòng họp hoặc bàn làm việc linh hoạt có sẵn tại Campus.",
+                                    style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
+                                Spacer(modifier = Modifier.height(18.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
                                         .background(Color.White)
                                         .clickable { onNavigateToSearch(null) }
                                         .padding(horizontal = 18.dp, vertical = 10.dp)
                                 ) {
                                     Text(
-                                        text = "Đặt phòng họp ngay",
-                                        color = primaryColor,
-                                        fontSize = 12.sp,
+                                        text = "Đặt không gian ngay",
+                                        color = FptBlue,
+                                        fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -292,47 +403,54 @@ fun HomeScreen(
                 }
             }
 
-            // Quick Actions section
+            // Quick Actions Section
             item {
                 Text(
-                    text = "Đăng Ký & Đặt Chỗ Làm Việc",
+                    text = "Không Gian Làm Việc",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        fontSize = 17.sp,
+                        color = AppTextPrimary
                     ),
-                    modifier = Modifier.padding(bottom = 14.dp)
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Book Room
+                    // Meeting Room Card
                     WorkspaceActionCard(
                         title = "Phòng Họp",
-                        subtitle = "Trang bị hiện đại",
+                        subtitle = "Trang bị màn hình 4K, smartboard",
+                        availability = "8 phòng trống",
                         icon = Icons.Default.MeetingRoom,
+                        iconBg = FptBlueLight,
+                        iconTint = FptBlue,
                         onClick = { onNavigateToSearch(ResourceType.ROOM) },
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Book Hot-desk
+                    // Hot-desk Card
                     WorkspaceActionCard(
-                        title = "Chỗ Ngồi",
-                        subtitle = "Bàn làm việc linh hoạt",
+                        title = "Bàn Làm Việc",
+                        subtitle = "Ghế công thái học, Wifi 6",
+                        availability = "24 bàn trống",
                         icon = Icons.Default.LaptopMac,
+                        iconBg = FptOrangeLight,
+                        iconTint = FptOrange,
                         onClick = { onNavigateToSearch(ResourceType.DESK) },
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // My Bookings Row Card
+                    // My Schedule Quick Button
                     MinimalActionButton(
                         title = "Lịch trình cá nhân",
                         icon = Icons.Default.CalendarToday,
@@ -340,7 +458,7 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Admin Console Row Card
+                    // Admin Console Quick Button
                     if (currentUser?.role == UserRole.ADMIN) {
                         MinimalActionButton(
                             title = "Bảng điều khiển Admin",
@@ -352,19 +470,34 @@ fun HomeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
             }
 
-            // Today's Bookings Section (Timeline Vibe)
+            // Today's Bookings Section
             item {
-                Text(
-                    text = "Lịch trình hôm nay",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
-                    ),
-                    modifier = Modifier.padding(bottom = 14.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Lịch trình hôm nay",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp,
+                            color = AppTextPrimary
+                        )
+                    )
+                    Text(
+                        text = "Xem tất cả",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = FptBlue
+                        ),
+                        modifier = Modifier.clickable { onNavigateToMyBookings() }
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
             when (val bookingsRes = todayBookingsState) {
@@ -376,7 +509,7 @@ fun HomeScreen(
                                 .height(80.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = primaryColor, strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
+                            CircularProgressIndicator(color = FptBlue, strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
                         }
                     }
                 }
@@ -393,8 +526,8 @@ fun HomeScreen(
                         item {
                             Card(
                                 shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardSurface),
-                                border = BorderStroke(1.dp, Color(0xFFF1F5F9)),
+                                colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+                                border = BorderStroke(1.dp, AppBorder),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(
@@ -407,12 +540,12 @@ fun HomeScreen(
                                         text = "Không có lịch đặt chỗ hôm nay",
                                         fontWeight = FontWeight.Bold,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = Color(0xFF94A3B8)
+                                        color = AppTextSecondary
                                     )
                                     Text(
                                         text = "Hãy chọn không gian làm việc trống để bắt đầu.",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = Color(0xFFCBD5E1),
+                                        color = AppTextMuted,
                                         modifier = Modifier.padding(top = 4.dp)
                                     )
                                 }
@@ -422,14 +555,12 @@ fun HomeScreen(
                         items(list) { booking ->
                             Card(
                                 shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardSurface),
-                                border = BorderStroke(1.dp, Color(0xFFF1F5F9)),
-                                elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 2.dp
-                                ),
+                                colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+                                border = BorderStroke(1.dp, AppBorder),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 6.dp)
+                                    .padding(vertical = 5.dp)
                                     .clickable { onNavigateToBooking(booking.resource.id) }
                             ) {
                                 Row(
@@ -441,29 +572,31 @@ fun HomeScreen(
                                     Box(
                                         modifier = Modifier
                                             .size(44.dp)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(primaryColor.copy(alpha = 0.1f)),
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(
+                                                if (booking.resource.type == ResourceType.ROOM) FptBlueLight else FptOrangeLight
+                                            ),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             imageVector = if (booking.resource.type == ResourceType.ROOM) Icons.Default.MeetingRoom else Icons.Default.LaptopMac,
                                             contentDescription = null,
-                                            tint = primaryColor,
+                                            tint = if (booking.resource.type == ResourceType.ROOM) FptBlue else FptOrange,
                                             modifier = Modifier.size(22.dp)
                                         )
                                     }
-                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Spacer(modifier = Modifier.width(14.dp))
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = booking.resource.name,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color(0xFF1E293B)
+                                            color = AppTextPrimary
                                         )
                                         Text(
                                             text = "${booking.resource.building} • ${booking.resource.floor}",
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = Color(0xFF64748B),
+                                            color = AppTextSecondary,
                                             modifier = Modifier.padding(top = 2.dp)
                                         )
                                     }
@@ -472,22 +605,10 @@ fun HomeScreen(
                                             text = "${booking.timeSlot.startTime} - ${booking.timeSlot.endTime}",
                                             fontWeight = FontWeight.ExtraBold,
                                             style = MaterialTheme.typography.labelMedium,
-                                            color = primaryColor
+                                            color = FptBlue
                                         )
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(top = 4.dp)
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(Color(0xFFD1FAE5))
-                                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = "Đã xác nhận",
-                                                color = Color(0xFF065F46),
-                                                fontSize = 9.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        BookingStatusBadge(status = booking.status)
                                     }
                                 }
                             }
@@ -498,21 +619,22 @@ fun HomeScreen(
 
             // Favorites section
             item {
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
                 Text(
                     text = "Không gian yêu thích",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        fontSize = 17.sp,
+                        color = AppTextPrimary
                     ),
-                    modifier = Modifier.padding(bottom = 14.dp)
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
 
                 if (favorites.isEmpty()) {
                     Card(
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = cardSurface),
-                        border = BorderStroke(1.dp, Color(0xFFF1F5F9)),
+                        colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+                        border = BorderStroke(1.dp, AppBorder),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(
@@ -524,7 +646,7 @@ fun HomeScreen(
                             Text(
                                 text = "Danh sách yêu thích trống.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF94A3B8)
+                                color = AppTextSecondary
                             )
                         }
                     }
@@ -536,13 +658,11 @@ fun HomeScreen(
                         items(favorites) { resource ->
                             Card(
                                 shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = cardSurface),
-                                border = BorderStroke(1.dp, Color(0xFFF1F5F9)),
-                                elevation = CardDefaults.cardElevation(
-                                    defaultElevation = 2.dp
-                                ),
+                                colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+                                border = BorderStroke(1.dp, AppBorder),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                                 modifier = Modifier
-                                    .width(240.dp)
+                                    .width(260.dp)
                                     .clickable { onNavigateToBooking(resource.id) }
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
@@ -555,7 +675,9 @@ fun HomeScreen(
                                             text = resource.name,
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color(0xFF1E293B),
+                                            color = AppTextPrimary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
                                             modifier = Modifier.weight(1f)
                                         )
                                         IconButton(
@@ -565,7 +687,7 @@ fun HomeScreen(
                                             Icon(
                                                 imageVector = Icons.Default.Favorite,
                                                 contentDescription = null,
-                                                tint = Color(0xFFEF4444),
+                                                tint = FptRose,
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
@@ -573,26 +695,29 @@ fun HomeScreen(
                                     Text(
                                         text = "${resource.building} • ${resource.floor}",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = Color(0xFF64748B),
+                                        color = AppTextSecondary,
                                         modifier = Modifier.padding(vertical = 4.dp)
                                     )
-                                    Spacer(modifier = Modifier.height(14.dp))
-                                    Box(
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.padding(vertical = 6.dp)
+                                    ) {
+                                        AmenityChip(
+                                            name = "${resource.capacity} chỗ",
+                                            icon = Icons.Default.People
+                                        )
+                                        resource.amenities.firstOrNull()?.let {
+                                            AmenityChip(name = it)
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    FButton(
+                                        text = "Đặt phòng ngay",
+                                        onClick = { onNavigateToBooking(resource.id) },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(primaryColor)
-                                            .clickable { onNavigateToBooking(resource.id) }
-                                            .padding(vertical = 8.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "Đặt phòng ngay",
-                                            color = Color.White,
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
+                                            .height(44.dp)
+                                    )
                                 }
                             }
                         }
@@ -607,21 +732,20 @@ fun HomeScreen(
 fun WorkspaceActionCard(
     title: String,
     subtitle: String,
+    availability: String,
     icon: ImageVector,
+    iconBg: Color,
+    iconTint: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFF2563EB)
     Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(
-            width = 1.dp,
-            color = Color(0xFFF1F5F9)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+        border = BorderStroke(width = 1.dp, color = AppBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
-            .height(120.dp)
+            .height(145.dp)
             .clickable { onClick() }
     ) {
         Column(
@@ -630,33 +754,56 @@ fun WorkspaceActionCard(
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(primaryColor.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = primaryColor,
-                    modifier = Modifier.size(20.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(iconBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(iconBg)
+                        .padding(horizontal = 6.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = availability,
+                        color = iconTint,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
+
             Column {
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF1E293B)
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 15.sp),
+                    color = AppTextPrimary
                 )
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF64748B),
-                    fontSize = 9.sp,
-                    lineHeight = 11.sp
+                    color = AppTextSecondary,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -671,12 +818,14 @@ fun MinimalActionButton(
     modifier: Modifier = Modifier,
     isDanger: Boolean = false
 ) {
-    val containerColor = if (isDanger) Color(0xFFFEF2F2) else Color(0xFFF1F5F9)
-    val contentColor = if (isDanger) Color(0xFFEF4444) else Color(0xFF475569)
+    val containerColor = if (isDanger) Color(0xFFFEF2F2) else AppCardSurface
+    val contentColor = if (isDanger) FptRose else AppTextPrimary
+    val borderColor = if (isDanger) Color(0xFFFCA5A5) else AppBorder
 
     Card(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = BorderStroke(1.dp, borderColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = modifier
             .height(48.dp)
@@ -693,13 +842,13 @@ fun MinimalActionButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = contentColor,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(17.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
                 color = contentColor
             )
         }

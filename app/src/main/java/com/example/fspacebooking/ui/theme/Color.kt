@@ -50,3 +50,24 @@ val OnError = Color(0xFFFFFFFF)
 val StatusAvailable = Color(0xFF10B981)   // Emerald Green
 val StatusBooked = Color(0xFFEF4444)      // Soft Coral Red
 val StatusMaint = Color(0xFFF59E0B)        // Warm Amber Yellow
+
+// FPT Enterprise Design Tokens
+val FptOrange = Color(0xFFF97316)
+val FptOrangeLight = Color(0xFFFFF7ED)
+val FptBlue = Color(0xFF2563EB)
+val FptBlueLight = Color(0xFFEFF6FF)
+val FptBlueDark = Color(0xFF1E3A8A)
+val FptEmerald = Color(0xFF10B981)
+val FptEmeraldLight = Color(0xFFDCFCE7)
+val FptRose = Color(0xFFEF4444)
+val FptRoseLight = Color(0xFFFEE2E2)
+val FptAmber = Color(0xFFF59E0B)
+val FptAmberLight = Color(0xFFFEF3C7)
+
+val AppBackground = Color(0xFFF8FAFC)
+val AppCardSurface = Color(0xFFFFFFFF)
+val AppBorder = Color(0xFFE2E8F0)
+val AppBorderSubtle = Color(0xFFF1F5F9)
+val AppTextPrimary = Color(0xFF0F172A)
+val AppTextSecondary = Color(0xFF64748B)
+val AppTextMuted = Color(0xFF94A3B8)
