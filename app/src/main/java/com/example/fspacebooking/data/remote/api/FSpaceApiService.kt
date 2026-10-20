@@ -1,5 +1,6 @@
 package com.example.fspacebooking.data.remote.api
 
+import com.example.fspacebooking.domain.model.AuditLogEntry
 import com.example.fspacebooking.domain.model.Booking
 import com.example.fspacebooking.domain.model.TimeSlot
 import com.example.fspacebooking.domain.model.User
@@ -20,7 +21,13 @@ data class LoginRequest(
 data class BookingRequest(
     val resourceId: String,
     val date: String,
-    val timeSlotId: Int
+    val timeSlotId: Int,
+    val purpose: String? = "Họp công việc nội bộ",
+    val userId: String? = null
+)
+
+data class CheckInRequest(
+    val qrHash: String = ""
 )
 
 interface FSpaceApiService {
@@ -57,12 +64,36 @@ interface FSpaceApiService {
     @POST("bookings")
     suspend fun createBooking(@Body request: BookingRequest): Booking
 
+    @POST("bookings/{id}/checkin")
+    suspend fun checkInBooking(
+        @Path("id") id: String,
+        @Body request: CheckInRequest = CheckInRequest()
+    ): Booking
+
     @DELETE("bookings/{id}")
     suspend fun cancelBooking(@Path("id") id: String): Unit
 
     @GET("bookings")
-    suspend fun getAllBookings(): List<Booking>
+    suspend fun getAllBookings(
+        @Query("userId") userId: String? = null,
+        @Query("date") date: String? = null
+    ): List<Booking>
 
     @GET("timeslots")
     suspend fun getTimeSlots(): List<TimeSlot>
+
+    @GET("admin/violators")
+    suspend fun getViolators(): List<User>
+
+    @POST("admin/users/{id}/unlock")
+    suspend fun unlockUser(@Path("id") id: String): Unit
+
+    @POST("admin/users/{id}/lock")
+    suspend fun lockUser(@Path("id") id: String): Unit
+
+    @GET("admin/audit-logs")
+    suspend fun getAuditLogs(): List<AuditLogEntry>
+
+    @GET("stats/utilization")
+    suspend fun getUtilizationStats(): Map<String, Float>
 }

@@ -55,7 +55,7 @@ object DataModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://fspace-office.fpt.com/api/") // Production F-Town workspace API base url
+            .baseUrl("http://10.0.2.2:8088/api/") // F-Space Node.js Backend connected to PostgreSQL (Port 8088)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

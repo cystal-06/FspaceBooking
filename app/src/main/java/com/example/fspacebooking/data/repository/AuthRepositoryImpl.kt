@@ -92,10 +92,25 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun getViolators(): Flow<List<User>> {
-        return com.example.fspacebooking.data.local.MockDataStore.usersFlow
+        return kotlinx.coroutines.flow.flow {
+            try {
+                val remoteUsers = apiService.getViolators()
+                if (remoteUsers.isNotEmpty()) {
+                    emit(remoteUsers)
+                    return@flow
+                }
+            } catch (_: Exception) {}
+            com.example.fspacebooking.data.local.MockDataStore.usersFlow.collect {
+                emit(it)
+            }
+        }
     }
 
     override suspend fun unlockUser(userId: String): Resource<Unit> {
+        try {
+            apiService.unlockUser(userId)
+        } catch (_: Exception) {}
+
         com.example.fspacebooking.data.local.MockDataStore.unlockUser(userId)
         try {
             userDao.resetViolations(userId)
@@ -113,6 +128,10 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun lockUser(userId: String): Resource<Unit> {
+        try {
+            apiService.lockUser(userId)
+        } catch (_: Exception) {}
+
         com.example.fspacebooking.data.local.MockDataStore.lockUser(userId)
         try {
             userDao.updateUserStatus(userId, "ĐÃ KHÓA", 3)

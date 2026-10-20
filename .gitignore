@@ -12,5 +12,6 @@ app/build/
 .externalNativeBuild
 .cxx
 *.log
+node_modules/
+Lablinux/
 ComputerGraphics/
-
