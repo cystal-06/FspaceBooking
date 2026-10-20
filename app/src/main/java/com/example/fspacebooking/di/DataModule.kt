@@ -28,6 +28,8 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import android.os.Build
+import java.util.concurrent.TimeUnit
 import javax.inject.Provider
 import javax.inject.Qualifier
 import javax.inject.Singleton
@@ -47,6 +49,9 @@ object DataModule {
             level = HttpLoggingInterceptor.Level.BODY
         }
         return OkHttpClient.Builder()
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(4, TimeUnit.SECONDS)
+            .writeTimeout(4, TimeUnit.SECONDS)
             .addInterceptor(logging)
             .build()
     }
@@ -54,8 +59,18 @@ object DataModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val isEmulator = Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk" == Build.PRODUCT
+
+        val host = if (isEmulator) "10.0.2.2" else "127.0.0.1"
         return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8088/api/") // F-Space Node.js Backend connected to PostgreSQL (Port 8088)
+            .baseUrl("http://$host:8088/api/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

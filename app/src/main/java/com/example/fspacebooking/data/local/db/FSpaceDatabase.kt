@@ -63,6 +63,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 DATABASE_NAME
             )
             .fallbackToDestructiveMigration()
+            .allowMainThreadQueries()
             .addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)

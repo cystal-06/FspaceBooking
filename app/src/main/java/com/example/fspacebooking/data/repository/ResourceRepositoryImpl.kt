@@ -8,9 +8,12 @@ import com.example.fspacebooking.domain.model.ResourceType
 import com.example.fspacebooking.domain.model.WorkspaceResource
 import com.example.fspacebooking.domain.repository.ResourceRepository
 import com.example.fspacebooking.utils.Resource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -79,17 +82,17 @@ class ResourceRepositoryImpl @Inject constructor(
             }.collect {
                 emit(it)
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun getResourceById(id: String): Resource<WorkspaceResource> {
+    override suspend fun getResourceById(id: String): Resource<WorkspaceResource> = withContext(Dispatchers.IO) {
         try {
             val remote = apiService.getResourceById(id)
-            return Resource.Success(remote)
+            return@withContext Resource.Success(remote)
         } catch (_: Exception) {}
 
         val entity = resourceDao.getResourceById(id)
-        return if (entity != null) {
+        if (entity != null) {
             Resource.Success(entity.toDomain())
         } else {
             Resource.Error("Không tìm thấy thông tin phòng họp")
@@ -100,49 +103,49 @@ class ResourceRepositoryImpl @Inject constructor(
         resourceId: String,
         date: String,
         timeSlotId: Int
-    ): Resource<Boolean> {
+    ): Resource<Boolean> = withContext(Dispatchers.IO) {
         val conflict = bookingDao.findConflictingBooking(resourceId, date, timeSlotId)
-        return Resource.Success(conflict == null)
+        Resource.Success(conflict == null)
     }
 
     override fun getFavoriteResources(): Flow<List<WorkspaceResource>> {
         return resourceDao.getFavoriteResources().map { entities ->
             entities.map { it.toDomain() }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun toggleFavorite(resourceId: String, isFavorite: Boolean) {
+    override suspend fun toggleFavorite(resourceId: String, isFavorite: Boolean) = withContext(Dispatchers.IO) {
         val entity = resourceDao.getResourceById(resourceId)
         if (entity != null) {
             resourceDao.updateResource(entity.copy(isFavorite = isFavorite))
         }
     }
 
-    override suspend fun addResource(resource: WorkspaceResource): Resource<WorkspaceResource> {
+    override suspend fun addResource(resource: WorkspaceResource): Resource<WorkspaceResource> = withContext(Dispatchers.IO) {
         try {
             val created = apiService.addResource(resource)
             resourceDao.insertResource(ResourceEntity.fromDomain(created))
-            return Resource.Success(created)
+            return@withContext Resource.Success(created)
         } catch (_: Exception) {}
         resourceDao.insertResource(ResourceEntity.fromDomain(resource))
-        return Resource.Success(resource)
+        Resource.Success(resource)
     }
 
-    override suspend fun updateResource(resource: WorkspaceResource): Resource<WorkspaceResource> {
+    override suspend fun updateResource(resource: WorkspaceResource): Resource<WorkspaceResource> = withContext(Dispatchers.IO) {
         try {
             val updated = apiService.updateResource(resource.id, resource)
             resourceDao.updateResource(ResourceEntity.fromDomain(updated))
-            return Resource.Success(updated)
+            return@withContext Resource.Success(updated)
         } catch (_: Exception) {}
         resourceDao.updateResource(ResourceEntity.fromDomain(resource))
-        return Resource.Success(resource)
+        Resource.Success(resource)
     }
 
-    override suspend fun deleteResource(id: String): Resource<Unit> {
+    override suspend fun deleteResource(id: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             apiService.deleteResource(id)
         } catch (_: Exception) {}
         resourceDao.deleteResourceById(id)
-        return Resource.Success(Unit)
+        Resource.Success(Unit)
     }
 }

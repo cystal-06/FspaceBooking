@@ -16,10 +16,12 @@ import com.example.fspacebooking.domain.repository.AuthRepository
 import com.example.fspacebooking.domain.repository.BookingRepository
 import com.example.fspacebooking.utils.Resource
 import com.google.gson.JsonParser
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,14 +43,14 @@ class BookingRepositoryImpl @Inject constructor(
         date: String,
         timeSlotId: Int,
         purpose: String
-    ): Resource<Booking> {
+    ): Resource<Booking> = withContext(Dispatchers.IO) {
         val currentUser = authRepository.getSessionUser().firstOrNull()
         if (currentUser == null) {
-            return Resource.Error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.")
+            return@withContext Resource.Error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.")
         }
 
         if (currentUser.userStatus == "ĐÃ KHÓA") {
-            return Resource.Error("Tài khoản của bạn đã bị KHÓA do vi phạm quy chế check-in quá 3 lần. Vui lòng liên hệ Quản trị viên (Admin) để mở khóa!")
+            return@withContext Resource.Error("Tài khoản của bạn đã bị KHÓA do vi phạm quy chế check-in quá 3 lần. Vui lòng liên hệ Quản trị viên (Admin) để mở khóa!")
         }
 
         // 1. First attempt: Remote Backend Server API (PostgreSQL with Row-level Lock)
@@ -90,7 +92,7 @@ class BookingRepositoryImpl @Inject constructor(
                 )
             } catch (_: Exception) {}
 
-            return Resource.Success(remoteBooking)
+            return@withContext Resource.Success(remoteBooking)
         } catch (e: Exception) {
             if (e is HttpException) {
                 val errorBody = e.response()?.errorBody()?.string() ?: ""
@@ -99,13 +101,13 @@ class BookingRepositoryImpl @Inject constructor(
                 } catch (_: Exception) {
                     "Khung giờ này đã được đồng nghiệp khác đặt trước hoặc tài khoản bị giới hạn."
                 }
-                return Resource.Error(errorMsg)
+                return@withContext Resource.Error(errorMsg)
             }
 
             // 2. Offline Fallback: Room SQLite database
             val conflict = bookingDao.findConflictingBooking(resourceId, date, timeSlotId)
             if (conflict != null) {
-                return Resource.Error("Khung giờ này đã được đồng nghiệp khác đặt trước.")
+                return@withContext Resource.Error("Khung giờ này đã được đồng nghiệp khác đặt trước.")
             }
 
             val resEntity = resourceDao.getResourceById(resourceId)
@@ -160,11 +162,11 @@ class BookingRepositoryImpl @Inject constructor(
                 purpose = purpose,
                 createdAt = nowStr
             )
-            return Resource.Success(booking)
+            return@withContext Resource.Success(booking)
         }
     }
 
-    override suspend fun checkInBooking(bookingId: String, qrCode: String): Resource<Booking> {
+    override suspend fun checkInBooking(bookingId: String, qrCode: String): Resource<Booking> = withContext(Dispatchers.IO) {
         // Attempt Remote Backend Server Check-in first
         try {
             val remoteBooking = apiService.checkInBooking(bookingId, CheckInRequest(qrHash = qrCode))
@@ -181,7 +183,7 @@ class BookingRepositoryImpl @Inject constructor(
                     )
                 )
             } catch (_: Exception) {}
-            return Resource.Success(remoteBooking)
+            return@withContext Resource.Success(remoteBooking)
         } catch (e: Exception) {
             if (e is HttpException) {
                 val errorBody = e.response()?.errorBody()?.string() ?: ""
@@ -190,12 +192,12 @@ class BookingRepositoryImpl @Inject constructor(
                 } catch (_: Exception) {
                     "Check-in không thành công."
                 }
-                return Resource.Error(errorMsg)
+                return@withContext Resource.Error(errorMsg)
             }
 
             // Fallback: Room SQLite database
             val entity = bookingDao.getBookingById(bookingId)
-            return if (entity != null) {
+            return@withContext if (entity != null) {
                 val nowTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
                 bookingDao.checkInBooking(bookingId, BookingStatus.CHECKED_IN, nowTime)
                 val res = resourceDao.getResourceById(entity.resourceId)?.toDomain()
@@ -239,7 +241,7 @@ class BookingRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun cancelBooking(bookingId: String): Resource<Unit> {
+    override suspend fun cancelBooking(bookingId: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             apiService.cancelBooking(bookingId)
         } catch (_: Exception) {}
@@ -255,7 +257,7 @@ class BookingRepositoryImpl @Inject constructor(
                 )
             )
         } catch (_: Exception) {}
-        return Resource.Success(Unit)
+        Resource.Success(Unit)
     }
 
     override fun getAuditLogs(): Flow<List<com.example.fspacebooking.domain.model.AuditLogEntry>> {
@@ -277,7 +279,7 @@ class BookingRepositoryImpl @Inject constructor(
                     )
                 })
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
     override fun getMyBookings(): Flow<Resource<List<Booking>>> {
@@ -324,7 +326,7 @@ class BookingRepositoryImpl @Inject constructor(
                 }
                 emit(Resource.Success(list))
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
     override fun getTodayBookings(): Flow<Resource<List<Booking>>> {
@@ -372,7 +374,7 @@ class BookingRepositoryImpl @Inject constructor(
                 }
                 emit(Resource.Success(list))
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
     override fun getAllBookings(): Flow<Resource<List<Booking>>> {
@@ -414,14 +416,14 @@ class BookingRepositoryImpl @Inject constructor(
                 }
                 emit(Resource.Success(list))
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun getResourceUtilizationStats(): Resource<Map<String, Float>> {
+    override suspend fun getResourceUtilizationStats(): Resource<Map<String, Float>> = withContext(Dispatchers.IO) {
         try {
             val remoteStats = apiService.getUtilizationStats()
             if (remoteStats.isNotEmpty()) {
-                return Resource.Success(remoteStats)
+                return@withContext Resource.Success(remoteStats)
             }
         } catch (_: Exception) {}
 
@@ -433,16 +435,16 @@ class BookingRepositoryImpl @Inject constructor(
             val rate = (30f + (count * 20f)).coerceAtMost(95f)
             res.name to rate
         }
-        return Resource.Success(statsMap)
+        Resource.Success(statsMap)
     }
 
-    override suspend fun getTimeSlots(): Resource<List<TimeSlot>> {
+    override suspend fun getTimeSlots(): Resource<List<TimeSlot>> = withContext(Dispatchers.IO) {
         try {
             val remoteSlots = apiService.getTimeSlots()
             if (remoteSlots.isNotEmpty()) {
-                return Resource.Success(remoteSlots)
+                return@withContext Resource.Success(remoteSlots)
             }
         } catch (_: Exception) {}
-        return Resource.Success(TimeSlot.DEFAULT_SLOTS)
+        Resource.Success(TimeSlot.DEFAULT_SLOTS)
     }
 }

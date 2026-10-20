@@ -11,10 +11,14 @@ import com.example.fspacebooking.domain.model.UserRole
 import com.example.fspacebooking.domain.repository.AuthRepository
 import com.example.fspacebooking.utils.Resource
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -45,12 +49,12 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun login(username: String, password: String): Resource<User> {
+    override suspend fun login(username: String, password: String): Resource<User> = withContext(Dispatchers.IO) {
         if (username.isBlank() || password.isBlank()) {
-            return Resource.Error("Username and password cannot be empty")
+            return@withContext Resource.Error("Username and password cannot be empty")
         }
 
-        return try {
+        return@withContext try {
             // Attempt remote authorization
             val user = apiService.login(LoginRequest(username, password))
             saveSessionUser(user)
@@ -75,9 +79,9 @@ class AuthRepositoryImpl @Inject constructor(
                     id = "user_${username.lowercase().trim()}",
                     username = username.trim(),
                     email = "$username@fpt.com",
-                    name = if (role == UserRole.ADMIN) "Admin Manager" else "Nhân viên FPT",
+                    name = if (role == UserRole.ADMIN) "Hoàng Minh Tuấn" else "Trần Văn Nam",
                     role = role,
-                    employeeId = if (role == UserRole.ADMIN) "ADM001" else "EMP999",
+                    employeeId = if (role == UserRole.ADMIN) "ADM001" else "EMP001",
                     token = "local-offline-session-token",
                     violations = 0,
                     userStatus = "ĐANG HOẠT ĐỘNG",
@@ -103,7 +107,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override fun getViolators(): Flow<List<User>> {
-        return kotlinx.coroutines.flow.flow {
+        return flow {
             try {
                 val remoteUsers = apiService.getViolators()
                 if (remoteUsers.isNotEmpty()) {
@@ -114,10 +118,10 @@ class AuthRepositoryImpl @Inject constructor(
             userDao.getViolators().collect { list ->
                 emit(list.map { it.toDomain() })
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
-    override suspend fun unlockUser(userId: String): Resource<Unit> {
+    override suspend fun unlockUser(userId: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             apiService.unlockUser(userId)
         } catch (_: Exception) {}
@@ -134,10 +138,10 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             )
         } catch (_: Exception) {}
-        return Resource.Success(Unit)
+        Resource.Success(Unit)
     }
 
-    override suspend fun lockUser(userId: String): Resource<Unit> {
+    override suspend fun lockUser(userId: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             apiService.lockUser(userId)
         } catch (_: Exception) {}
@@ -154,10 +158,10 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             )
         } catch (_: Exception) {}
-        return Resource.Success(Unit)
+        Resource.Success(Unit)
     }
 
-    override suspend fun sendWarningEmail(userId: String): Resource<Unit> {
+    override suspend fun sendWarningEmail(userId: String): Resource<Unit> = withContext(Dispatchers.IO) {
         try {
             auditLogDao.insertLog(
                 AuditLogEntity(
@@ -169,11 +173,11 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             )
         } catch (_: Exception) {}
-        return Resource.Success(Unit)
+        Resource.Success(Unit)
     }
 
-    override suspend fun logout(): Resource<Unit> {
-        return try {
+    override suspend fun logout(): Resource<Unit> = withContext(Dispatchers.IO) {
+        try {
             apiService.logout()
             clearSession()
             Resource.Success(Unit)
@@ -187,13 +191,13 @@ class AuthRepositoryImpl @Inject constructor(
         return _currentUser.asStateFlow()
     }
 
-    override suspend fun saveSessionUser(user: User) {
+    override suspend fun saveSessionUser(user: User) = withContext(Dispatchers.IO) {
         val userJson = gson.toJson(user)
         sharedPreferences.edit().putString(KEY_USER, userJson).apply()
         _currentUser.value = user
     }
 
-    override suspend fun clearSession() {
+    override suspend fun clearSession() = withContext(Dispatchers.IO) {
         sharedPreferences.edit().remove(KEY_USER).apply()
         _currentUser.value = null
     }
@@ -202,4 +206,3 @@ class AuthRepositoryImpl @Inject constructor(
         private const val KEY_USER = "auth_session_user"
     }
 }
-
