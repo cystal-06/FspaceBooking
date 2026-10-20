@@ -99,7 +99,7 @@ import java.util.Locale
 @Composable
 fun MyBookingsScreen(
     viewModel: MyBookingsViewModel,
-    onNavigateBack: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val bookingsState by viewModel.bookingsState.collectAsState()
@@ -139,8 +139,10 @@ fun MyBookingsScreen(
             TopAppBar(
                 title = { Text("Lịch trình của tôi", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Color(0xFF1E293B)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại", tint = Color(0xFF1E293B))
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại", tint = Color(0xFF1E293B))
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = backgroundLight)

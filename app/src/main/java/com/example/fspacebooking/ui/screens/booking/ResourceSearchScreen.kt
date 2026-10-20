@@ -116,7 +116,7 @@ import java.util.Locale
 fun ResourceSearchScreen(
     viewModel: SearchViewModel,
     initialType: ResourceType?,
-    onNavigateBack: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
     onResourceSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -174,8 +174,10 @@ fun ResourceSearchScreen(
             TopAppBar(
                 title = { Text("Đặt Phòng & Chỗ Ngồi", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = Color(0xFF1E293B)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại", tint = Color(0xFF1E293B))
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Quay lại", tint = Color(0xFF1E293B))
+                        }
                     }
                 },
                 actions = {

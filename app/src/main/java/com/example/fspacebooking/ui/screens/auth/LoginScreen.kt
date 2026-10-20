@@ -1,5 +1,8 @@
 package com.example.fspacebooking.ui.screens.auth
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,10 +25,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.AdminPanelSettings
-import androidx.compose.material.icons.filled.Apartment
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -33,7 +34,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -56,24 +57,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fspacebooking.domain.model.User
 import com.example.fspacebooking.ui.components.FButton
-import com.example.fspacebooking.ui.components.FCard
 import com.example.fspacebooking.ui.components.FTextField
 import com.example.fspacebooking.ui.theme.AppBackground
 import com.example.fspacebooking.ui.theme.AppBorder
-import com.example.fspacebooking.ui.theme.AppBorderSubtle
 import com.example.fspacebooking.ui.theme.AppCardSurface
 import com.example.fspacebooking.ui.theme.AppTextMuted
 import com.example.fspacebooking.ui.theme.AppTextPrimary
 import com.example.fspacebooking.ui.theme.AppTextSecondary
-import com.example.fspacebooking.ui.theme.FptAmber
-import com.example.fspacebooking.ui.theme.FptAmberLight
 import com.example.fspacebooking.ui.theme.FptBlue
-import com.example.fspacebooking.ui.theme.FptBlueDark
-import com.example.fspacebooking.ui.theme.FptBlueLight
-import com.example.fspacebooking.ui.theme.FptEmerald
-import com.example.fspacebooking.ui.theme.FptEmeraldLight
 import com.example.fspacebooking.ui.theme.FptOrange
-import com.example.fspacebooking.ui.theme.FptOrangeLight
 import com.example.fspacebooking.ui.theme.FptRose
 import com.example.fspacebooking.ui.theme.FptRoseLight
 import com.example.fspacebooking.ui.viewmodels.AuthViewModel
@@ -90,63 +82,74 @@ fun LoginScreen(
     val loginState by viewModel.loginState
 
     var isPasswordVisible by remember { mutableStateOf(false) }
+    var rememberMe by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
 
-    // Smooth enterprise gradient background
-    val gradient = Brush.verticalGradient(
+    // Elegant corporate background gradient
+    val backgroundBrush = Brush.verticalGradient(
         colors = listOf(
-            FptBlue.copy(alpha = 0.08f),
-            AppBackground,
-            AppBackground
+            Color(0xFFEFF6FF), // Soft azure
+            Color(0xFFF8FAFC), // Slate background
+            Color(0xFFF8FAFC)
         )
     )
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(gradient)
+            .background(backgroundBrush)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // FPT Corporate App Logo with multi-color gradient
+            // 1. Corporate FPT Logo Emblem
             Box(
                 modifier = Modifier
-                    .size(72.dp)
+                    .size(68.dp)
+                    .shadow(elevation = 8.dp, shape = RoundedCornerShape(20.dp), spotColor = FptBlue.copy(alpha = 0.25f))
                     .clip(RoundedCornerShape(20.dp))
                     .background(
                         Brush.linearGradient(
-                            listOf(FptOrange, FptBlue)
+                            listOf(Color(0xFF2563EB), Color(0xFF1D4ED8), Color(0xFF1E3A8A))
                         )
-                    )
-                    .border(2.dp, Color.White, RoundedCornerShape(20.dp)),
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "F",
-                    color = Color.White,
-                    style = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 38.sp
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "F",
+                        color = Color.White,
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 34.sp
+                        )
                     )
-                )
+                    Box(
+                        modifier = Modifier
+                            .padding(bottom = 12.dp, start = 2.dp)
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(FptOrange)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // App title with highlight
+            // 2. App Branding Title & Subtitle
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "F-Space ",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
                         letterSpacing = (-0.5).sp
                     ),
                     color = AppTextPrimary
@@ -154,7 +157,8 @@ fun LoginScreen(
                 Text(
                     text = "Booking",
                     style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Black,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
                         letterSpacing = (-0.5).sp
                     ),
                     color = FptBlue
@@ -164,58 +168,65 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Hệ thống Quản lý & Đặt chỗ FPT Software",
+                text = "Hệ thống Quản lý Không gian & Đặt chỗ FPT",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = AppTextSecondary,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Normal
                 )
             )
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Login Card Form
-            FCard(
+            // 3. Login Card Surface
+            Card(
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = AppCardSurface),
+                border = BorderStroke(1.dp, AppBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(24.dp)
                 ) {
                     Text(
-                        text = "Đăng Nhập",
+                        text = "Đăng nhập",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
                             color = AppTextPrimary
-                        ),
-                        modifier = Modifier.align(Alignment.Start)
+                        )
                     )
 
                     Text(
-                        text = "Đăng nhập tài khoản nội bộ FPT để tiếp tục",
+                        text = "Sử dụng tài khoản nhân viên để tiếp tục",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            color = AppTextSecondary
+                            color = AppTextSecondary,
+                            fontSize = 13.sp
                         ),
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(top = 4.dp, bottom = 20.dp)
+                        modifier = Modifier.padding(top = 4.dp, bottom = 22.dp)
                     )
 
+                    // Username / Email Input
                     FTextField(
                         value = username,
                         onValueChange = viewModel::onUsernameChange,
-                        label = "Tên đăng nhập hoặc Email FPT",
+                        label = "Tên đăng nhập hoặc Email",
+                        placeholder = "Ví dụ: employee hoặc namtv@fpt.com",
                         leadingIcon = Icons.Default.Person,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // Password Input
                     FTextField(
                         value = password,
                         onValueChange = viewModel::onPasswordChange,
                         label = "Mật khẩu",
+                        placeholder = "Nhập mật khẩu",
                         leadingIcon = Icons.Default.Lock,
                         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -231,34 +242,105 @@ fun LoginScreen(
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    val isError = loginState is Resource.Error
-                    if (isError) {
+                    // Remember Me & Forgot Password
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(FptRoseLight)
-                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { rememberMe = !rememberMe }
+                                .padding(vertical = 4.dp, horizontal = 2.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Error,
-                                contentDescription = null,
-                                tint = FptRose,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .background(if (rememberMe) FptBlue else Color.Transparent)
+                                    .border(1.dp, if (rememberMe) FptBlue else AppBorder, RoundedCornerShape(5.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (rememberMe) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = (loginState as Resource.Error).message ?: "Đăng nhập thất bại",
-                                color = FptRose,
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold)
+                                text = "Ghi nhớ",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    color = AppTextSecondary
+                                )
                             )
                         }
-                        Spacer(modifier = Modifier.height(14.dp))
+
+                        Text(
+                            text = "Quên mật khẩu?",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = FptBlue
+                            ),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    viewModel.onUsernameChange("employee")
+                                    viewModel.onPasswordChange("emp123")
+                                }
+                                .padding(4.dp)
+                        )
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Error Message Banner (if any)
+                    val isError = loginState is Resource.Error
+                    AnimatedVisibility(
+                        visible = isError,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(FptRoseLight)
+                                    .border(1.dp, FptRose.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
+                                    .padding(horizontal = 12.dp, vertical = 9.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Error,
+                                    contentDescription = null,
+                                    tint = FptRose,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = (loginState as? Resource.Error)?.message ?: "Đăng nhập thất bại. Vui lòng kiểm tra lại.",
+                                    color = FptRose,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 12.sp
+                                    )
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(14.dp))
+                        }
+                    }
+
+                    // Primary Login Button
                     FButton(
                         text = "Đăng nhập",
                         onClick = { viewModel.login(onLoginSuccess) },
@@ -267,135 +349,100 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    FButton(
-                        text = "Đăng nhập nhanh với FPT Mail",
-                        onClick = {
-                            viewModel.onUsernameChange("employee")
-                            viewModel.onPasswordChange("emp123")
-                            viewModel.login(onLoginSuccess)
-                        },
-                        isSecondary = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(20.dp))
-                    HorizontalDivider(color = AppBorderSubtle, thickness = 1.dp)
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Tài khoản kiểm thử nhanh (Demo):",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = AppTextSecondary,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.align(Alignment.Start)
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // FPT Corporate SSO Button
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF1F5F9))
+                            .clickable {
+                                viewModel.onUsernameChange("employee")
+                                viewModel.onPasswordChange("emp123")
+                                viewModel.login(onLoginSuccess)
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Admin Demo Selector Chip
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(FptBlueLight)
-                                .border(1.dp, FptBlue.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    viewModel.onUsernameChange("admin")
-                                    viewModel.onPasswordChange("admin123")
-                                }
-                                .padding(horizontal = 8.dp, vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.AdminPanelSettings,
-                                        contentDescription = null,
-                                        tint = FptBlue,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Admin", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = FptBlue)
-                                }
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("Quản trị viên", fontSize = 9.sp, color = AppTextSecondary)
-                            }
-                        }
-
-                        // Employee NamTV Demo Selector Chip
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(FptEmeraldLight)
-                                .border(1.dp, FptEmerald.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    viewModel.onUsernameChange("employee")
-                                    viewModel.onPasswordChange("emp123")
-                                }
-                                .padding(horizontal = 8.dp, vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.CheckCircle,
-                                        contentDescription = null,
-                                        tint = FptEmerald,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("NamTV", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = FptEmerald)
-                                }
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("Nhân viên (Hợp lệ)", fontSize = 9.sp, color = AppTextSecondary)
-                            }
-                        }
-
-                        // Locked DucBT Demo Selector Chip
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(FptRoseLight)
-                                .border(1.dp, FptRose.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
-                                .clickable {
-                                    viewModel.onUsernameChange("ducbt")
-                                    viewModel.onPasswordChange("123456")
-                                }
-                                .padding(horizontal = 8.dp, vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Block,
-                                        contentDescription = null,
-                                        tint = FptRose,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("DucBT", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = FptRose)
-                                }
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text("Bị khóa (UC12)", fontSize = 9.sp, color = FptRose)
-                            }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Business,
+                                contentDescription = null,
+                                tint = Color(0xFF334155),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Đăng nhập nhanh với FPT SSO",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF334155)
+                                )
+                            )
                         }
                     }
                 }
             }
 
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 4. Subtle, Professional Quick Account Chips (Discreet testing toolbar)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Text(
+                    text = "Tài khoản mẫu:",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = AppTextSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Employee NamTV chip
+                QuickAccountChip(
+                    label = "Nhân viên (NamTV)",
+                    color = FptBlue,
+                    onClick = {
+                        viewModel.onUsernameChange("employee")
+                        viewModel.onPasswordChange("emp123")
+                    }
+                )
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                // Admin chip
+                QuickAccountChip(
+                    label = "Quản trị viên",
+                    color = FptOrange,
+                    onClick = {
+                        viewModel.onUsernameChange("admin")
+                        viewModel.onPasswordChange("admin123")
+                    }
+                )
+
+                Spacer(modifier = Modifier.width(6.dp))
+
+                // Locked chip
+                QuickAccountChip(
+                    label = "Khóa (DucBT)",
+                    color = FptRose,
+                    onClick = {
+                        viewModel.onUsernameChange("ducbt")
+                        viewModel.onPasswordChange("123456")
+                    }
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Footer
+            // 5. Minimalist Footer
             Text(
-                text = "FPT Software © 2026 • Campus Booking Solution",
+                text = "FPT Software © 2026 • F-Town Smart Campus",
                 style = MaterialTheme.typography.labelSmall.copy(
                     color = AppTextMuted,
                     fontSize = 11.sp
@@ -404,5 +451,29 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun QuickAccountChip(
+    label: String,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color.copy(alpha = 0.08f))
+            .border(1.dp, color.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = color
+        )
     }
 }

@@ -533,13 +533,34 @@ fun ProfileScreen(
         }
 
         // Logout action button
-        FButton(
-            text = "Đăng xuất tài khoản",
-            onClick = onLogout,
-            isSecondary = true,
-            leadingIcon = Icons.AutoMirrored.Filled.Logout,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(FptRoseLight)
+                .border(1.dp, FptRose.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
+                .clickable { onLogout() },
+            contentAlignment = Alignment.Center
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = null,
+                    tint = FptRose,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Đăng xuất tài khoản",
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = FptRose
+                    )
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

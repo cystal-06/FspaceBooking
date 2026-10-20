@@ -144,12 +144,12 @@ fun MainTabContainerScreen(
                     1 -> ResourceSearchScreen(
                         viewModel = searchViewModel,
                         initialType = searchInitialType,
-                        onNavigateBack = { activeTabIndex = 0 },
+                        onNavigateBack = null,
                         onResourceSelect = onNavigateToBooking
                     )
                     2 -> MyBookingsScreen(
                         viewModel = myBookingsViewModel,
-                        onNavigateBack = { activeTabIndex = 0 }
+                        onNavigateBack = null
                     )
                     3 -> ProfileScreen(
                         viewModel = authViewModel,
