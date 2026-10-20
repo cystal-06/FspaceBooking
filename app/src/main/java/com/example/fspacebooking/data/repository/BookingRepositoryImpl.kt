@@ -1,8 +1,8 @@
 package com.example.fspacebooking.data.repository
 
-import com.example.fspacebooking.data.local.MockDataStore
 import com.example.fspacebooking.data.local.dao.AuditLogDao
 import com.example.fspacebooking.data.local.dao.BookingDao
+import com.example.fspacebooking.data.local.dao.ResourceDao
 import com.example.fspacebooking.data.local.entity.AuditLogEntity
 import com.example.fspacebooking.data.local.entity.BookingEntity
 import com.example.fspacebooking.data.remote.api.BookingRequest
@@ -11,6 +11,7 @@ import com.example.fspacebooking.data.remote.api.FSpaceApiService
 import com.example.fspacebooking.domain.model.Booking
 import com.example.fspacebooking.domain.model.BookingStatus
 import com.example.fspacebooking.domain.model.TimeSlot
+import com.example.fspacebooking.domain.model.WorkspaceResource
 import com.example.fspacebooking.domain.repository.AuthRepository
 import com.example.fspacebooking.domain.repository.BookingRepository
 import com.example.fspacebooking.utils.Resource
@@ -31,7 +32,8 @@ class BookingRepositoryImpl @Inject constructor(
     private val authRepository: AuthRepository,
     private val apiService: FSpaceApiService,
     private val bookingDao: BookingDao,
-    private val auditLogDao: AuditLogDao
+    private val auditLogDao: AuditLogDao,
+    private val resourceDao: ResourceDao
 ) : BookingRepository {
 
     override suspend fun createBooking(
@@ -100,46 +102,65 @@ class BookingRepositoryImpl @Inject constructor(
                 return Resource.Error(errorMsg)
             }
 
-            // 2. Offline Fallback: If Backend is unreachable, fallback to MockDataStore
-            val booking = MockDataStore.bookResource(
-                resourceId = resourceId,
-                date = date,
-                timeSlotId = timeSlotId,
+            // 2. Offline Fallback: Room SQLite database
+            val conflict = bookingDao.findConflictingBooking(resourceId, date, timeSlotId)
+            if (conflict != null) {
+                return Resource.Error("Khung giờ này đã được đồng nghiệp khác đặt trước.")
+            }
+
+            val resEntity = resourceDao.getResourceById(resourceId)
+            val resourceDomain = resEntity?.toDomain() ?: WorkspaceResource(
+                id = resourceId,
+                name = "Phòng $resourceId",
+                type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
+                capacity = 6,
+                building = "F-Town 1",
+                floor = "Floor 2",
+                status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
+            )
+            val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == timeSlotId }
+                ?: TimeSlot(timeSlotId, "08:00", "10:00", "Slot $timeSlotId")
+            val newId = "b_${System.currentTimeMillis()}"
+            val nowStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+
+            val bookingEntity = BookingEntity(
+                id = newId,
                 userId = currentUser.id,
                 username = currentUser.username,
-                purpose = purpose
+                resourceId = resourceId,
+                timeSlotId = timeSlotId,
+                date = date,
+                status = BookingStatus.CONFIRMED,
+                purpose = purpose,
+                qrCode = "QR_${newId}_${resourceId}",
+                createdAt = nowStr
             )
+            bookingDao.insertBooking(bookingEntity)
 
-            return if (booking != null) {
-                try {
-                    bookingDao.insertBooking(
-                        BookingEntity(
-                            id = booking.id,
-                            userId = booking.userId,
-                            username = booking.username,
-                            resourceId = booking.resource.id,
-                            timeSlotId = booking.timeSlot.id,
-                            date = booking.date,
-                            status = booking.status,
-                            purpose = booking.purpose,
-                            qrCode = "QR_${booking.id}_${booking.resource.id}",
-                            createdAt = booking.createdAt
-                        )
+            try {
+                auditLogDao.insertLog(
+                    AuditLogEntity(
+                        id = "log_${System.currentTimeMillis()}",
+                        timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                        category = "BOOKING",
+                        message = "Người dùng '${currentUser.name}' đặt thành công '${resourceDomain.name}' ($date [${slot.startTime}-${slot.endTime}]).",
+                        actorId = currentUser.id
                     )
-                    auditLogDao.insertLog(
-                        AuditLogEntity(
-                            id = "log_${System.currentTimeMillis()}",
-                            timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
-                            category = "BOOKING",
-                            message = "Người dùng '${currentUser.name}' đặt thành công '${booking.resource.name}' (${booking.date} [${booking.timeSlot.startTime}-${booking.timeSlot.endTime}]).",
-                            actorId = currentUser.id
-                        )
-                    )
-                } catch (_: Exception) {}
-                Resource.Success(booking)
-            } else {
-                Resource.Error("Không thể thực hiện đặt chỗ. Khung giờ này có thể đã bị chiếm hoặc tài khoản bị giới hạn.")
-            }
+                )
+            } catch (_: Exception) {}
+
+            val booking = Booking(
+                id = newId,
+                userId = currentUser.id,
+                username = currentUser.username,
+                resource = resourceDomain,
+                timeSlot = slot,
+                date = date,
+                status = BookingStatus.CONFIRMED,
+                purpose = purpose,
+                createdAt = nowStr
+            )
+            return Resource.Success(booking)
         }
     }
 
@@ -172,26 +193,48 @@ class BookingRepositoryImpl @Inject constructor(
                 return Resource.Error(errorMsg)
             }
 
-            // Fallback
-            val result = MockDataStore.checkInBooking(bookingId, qrCode)
-            return if (result.isSuccess) {
-                val booking = result.getOrThrow()
+            // Fallback: Room SQLite database
+            val entity = bookingDao.getBookingById(bookingId)
+            return if (entity != null) {
                 val nowTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+                bookingDao.checkInBooking(bookingId, BookingStatus.CHECKED_IN, nowTime)
+                val res = resourceDao.getResourceById(entity.resourceId)?.toDomain()
+                    ?: WorkspaceResource(
+                        id = entity.resourceId,
+                        name = "Phòng ${entity.resourceId}",
+                        type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
+                        capacity = 6,
+                        building = "F-Town 1",
+                        floor = "Floor 2",
+                        status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
+                    )
+                val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
+                    ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
                 try {
-                    bookingDao.checkInBooking(bookingId, BookingStatus.CHECKED_IN, nowTime)
                     auditLogDao.insertLog(
                         AuditLogEntity(
                             id = "log_${System.currentTimeMillis()}",
                             timestamp = nowTime,
                             category = "CHECKIN",
-                            message = "Quét mã QR Check-in thành công cho phòng '${booking.resource.name}' (Mã: $bookingId).",
-                            actorId = booking.userId
+                            message = "Quét mã QR Check-in thành công cho phòng '${res.name}' (Mã: $bookingId).",
+                            actorId = entity.userId
                         )
                     )
                 } catch (_: Exception) {}
-                Resource.Success(booking)
+                val updatedBooking = Booking(
+                    id = entity.id,
+                    userId = entity.userId,
+                    username = entity.username,
+                    resource = res,
+                    timeSlot = slot,
+                    date = entity.date,
+                    status = BookingStatus.CHECKED_IN,
+                    purpose = entity.purpose,
+                    createdAt = entity.createdAt
+                )
+                Resource.Success(updatedBooking)
             } else {
-                Resource.Error(result.exceptionOrNull()?.message ?: "Check-in không thành công.")
+                Resource.Error("Không tìm thấy mã đặt chỗ để thực hiện Check-in.")
             }
         }
     }
@@ -201,7 +244,6 @@ class BookingRepositoryImpl @Inject constructor(
             apiService.cancelBooking(bookingId)
         } catch (_: Exception) {}
 
-        MockDataStore.cancelBooking(bookingId)
         try {
             bookingDao.updateBookingStatus(bookingId, BookingStatus.CANCELLED)
             auditLogDao.insertLog(
@@ -225,7 +267,16 @@ class BookingRepositoryImpl @Inject constructor(
                     return@flow
                 }
             } catch (_: Exception) {}
-            MockDataStore.auditLogsFlow.collect { emit(it) }
+            auditLogDao.getAllLogs().collect { entities ->
+                emit(entities.map {
+                    com.example.fspacebooking.domain.model.AuditLogEntry(
+                        id = it.id,
+                        timestamp = it.timestamp,
+                        category = it.category,
+                        message = it.message
+                    )
+                })
+            }
         }
     }
 
@@ -244,11 +295,34 @@ class BookingRepositoryImpl @Inject constructor(
                 }
             } catch (_: Exception) {}
 
-            // Fallback to local
-            MockDataStore.bookingsFlow.map { list ->
-                Resource.Success(list.filter { it.userId == userId })
-            }.collect {
-                emit(it)
+            // Fallback to SQLite Room DB
+            bookingDao.getBookingsByUserId(userId).collect { entities ->
+                val list = entities.map { entity ->
+                    val res = resourceDao.getResourceById(entity.resourceId)?.toDomain()
+                        ?: WorkspaceResource(
+                            id = entity.resourceId,
+                            name = "Phòng ${entity.resourceId}",
+                            type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
+                            capacity = 6,
+                            building = "F-Town 1",
+                            floor = "Floor 2",
+                            status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
+                        )
+                    val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
+                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                    Booking(
+                        id = entity.id,
+                        userId = entity.userId,
+                        username = entity.username,
+                        resource = res,
+                        timeSlot = slot,
+                        date = entity.date,
+                        status = entity.status,
+                        purpose = entity.purpose,
+                        createdAt = entity.createdAt
+                    )
+                }
+                emit(Resource.Success(list))
             }
         }
     }
@@ -268,16 +342,35 @@ class BookingRepositoryImpl @Inject constructor(
                 }
             } catch (_: Exception) {}
 
-            MockDataStore.bookingsFlow.map { list ->
-                Resource.Success(
-                    list.filter {
-                        it.userId == userId &&
-                        it.date == todayStr &&
-                        it.status == BookingStatus.CONFIRMED
-                    }
-                )
-            }.collect {
-                emit(it)
+            bookingDao.getBookingsByDate(todayStr).collect { entities ->
+                val list = entities.filter {
+                    it.userId == userId && it.status == BookingStatus.CONFIRMED
+                }.map { entity ->
+                    val res = resourceDao.getResourceById(entity.resourceId)?.toDomain()
+                        ?: WorkspaceResource(
+                            id = entity.resourceId,
+                            name = "Phòng ${entity.resourceId}",
+                            type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
+                            capacity = 6,
+                            building = "F-Town 1",
+                            floor = "Floor 2",
+                            status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
+                        )
+                    val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
+                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                    Booking(
+                        id = entity.id,
+                        userId = entity.userId,
+                        username = entity.username,
+                        resource = res,
+                        timeSlot = slot,
+                        date = entity.date,
+                        status = entity.status,
+                        purpose = entity.purpose,
+                        createdAt = entity.createdAt
+                    )
+                }
+                emit(Resource.Success(list))
             }
         }
     }
@@ -293,10 +386,33 @@ class BookingRepositoryImpl @Inject constructor(
                 }
             } catch (_: Exception) {}
 
-            MockDataStore.bookingsFlow.map { list ->
-                Resource.Success(list)
-            }.collect {
-                emit(it)
+            bookingDao.getAllBookings().collect { entities ->
+                val list = entities.map { entity ->
+                    val res = resourceDao.getResourceById(entity.resourceId)?.toDomain()
+                        ?: WorkspaceResource(
+                            id = entity.resourceId,
+                            name = "Phòng ${entity.resourceId}",
+                            type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
+                            capacity = 6,
+                            building = "F-Town 1",
+                            floor = "Floor 2",
+                            status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
+                        )
+                    val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
+                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                    Booking(
+                        id = entity.id,
+                        userId = entity.userId,
+                        username = entity.username,
+                        resource = res,
+                        timeSlot = slot,
+                        date = entity.date,
+                        status = entity.status,
+                        purpose = entity.purpose,
+                        createdAt = entity.createdAt
+                    )
+                }
+                emit(Resource.Success(list))
             }
         }
     }
@@ -309,11 +425,11 @@ class BookingRepositoryImpl @Inject constructor(
             }
         } catch (_: Exception) {}
 
-        val bookings = MockDataStore.bookingsFlow.value
-        val totalResources = MockDataStore.resourcesFlow.value
+        val totalResources = resourceDao.getAllResources().firstOrNull() ?: emptyList()
+        val allBookings = bookingDao.getAllBookings().firstOrNull() ?: emptyList()
 
         val statsMap = totalResources.associate { res ->
-            val count = bookings.count { it.resource.id == res.id && it.status == BookingStatus.CONFIRMED }
+            val count = allBookings.count { it.resourceId == res.id && it.status == BookingStatus.CONFIRMED }
             val rate = (30f + (count * 20f)).coerceAtMost(95f)
             res.name to rate
         }
@@ -327,6 +443,6 @@ class BookingRepositoryImpl @Inject constructor(
                 return Resource.Success(remoteSlots)
             }
         } catch (_: Exception) {}
-        return Resource.Success(MockDataStore.timeSlots)
+        return Resource.Success(TimeSlot.DEFAULT_SLOTS)
     }
 }

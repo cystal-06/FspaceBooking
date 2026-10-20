@@ -604,7 +604,7 @@ fun BookingScreen(
                                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                                         ) {
                                             rowSlots.forEach { slot ->
-                                                val isBooked = slot.id == 3 // Mock booked state for slot 3
+                                                val isBooked = false
                                                 val isSelected = selectedSlotId == slot.id
 
                                                 val cardBg = when {

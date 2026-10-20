@@ -1,6 +1,6 @@
 package com.example.fspacebooking.data.repository
 
-import com.example.fspacebooking.data.local.MockDataStore
+import com.example.fspacebooking.data.local.dao.BookingDao
 import com.example.fspacebooking.data.local.dao.ResourceDao
 import com.example.fspacebooking.data.local.entity.ResourceEntity
 import com.example.fspacebooking.data.remote.api.FSpaceApiService
@@ -17,7 +17,8 @@ import javax.inject.Singleton
 @Singleton
 class ResourceRepositoryImpl @Inject constructor(
     private val apiService: FSpaceApiService,
-    private val resourceDao: ResourceDao
+    private val resourceDao: ResourceDao,
+    private val bookingDao: BookingDao
 ) : ResourceRepository {
 
     override fun getResources(
@@ -53,9 +54,9 @@ class ResourceRepositoryImpl @Inject constructor(
                 // Network unavailable or server offline -> fallback to local
             }
 
-            // 2. Offline Fallback from MockDataStore / Room
-            MockDataStore.resourcesFlow.map { list ->
-                var domainList = list
+            // 2. Offline Fallback from SQLite Room DB
+            resourceDao.getAllResources().map { entities ->
+                var domainList = entities.map { it.toDomain() }
                 if (type != null) {
                     domainList = domainList.filter { it.type == type }
                 }
@@ -87,9 +88,9 @@ class ResourceRepositoryImpl @Inject constructor(
             return Resource.Success(remote)
         } catch (_: Exception) {}
 
-        val resource = MockDataStore.resourcesFlow.value.find { it.id == id }
-        return if (resource != null) {
-            Resource.Success(resource)
+        val entity = resourceDao.getResourceById(id)
+        return if (entity != null) {
+            Resource.Success(entity.toDomain())
         } else {
             Resource.Error("Không tìm thấy thông tin phòng họp")
         }
@@ -100,49 +101,48 @@ class ResourceRepositoryImpl @Inject constructor(
         date: String,
         timeSlotId: Int
     ): Resource<Boolean> {
-        val hasConflict = MockDataStore.bookingsFlow.value.any {
-            it.resource.id == resourceId &&
-            it.date == date &&
-            it.timeSlot.id == timeSlotId &&
-            it.status == com.example.fspacebooking.domain.model.BookingStatus.CONFIRMED
-        }
-        return Resource.Success(!hasConflict)
+        val conflict = bookingDao.findConflictingBooking(resourceId, date, timeSlotId)
+        return Resource.Success(conflict == null)
     }
 
     override fun getFavoriteResources(): Flow<List<WorkspaceResource>> {
-        return MockDataStore.resourcesFlow.map { list ->
-            list.filter { it.isFavorite }
+        return resourceDao.getFavoriteResources().map { entities ->
+            entities.map { it.toDomain() }
         }
     }
 
     override suspend fun toggleFavorite(resourceId: String, isFavorite: Boolean) {
-        MockDataStore.toggleFavorite(resourceId, isFavorite)
+        val entity = resourceDao.getResourceById(resourceId)
+        if (entity != null) {
+            resourceDao.updateResource(entity.copy(isFavorite = isFavorite))
+        }
     }
 
     override suspend fun addResource(resource: WorkspaceResource): Resource<WorkspaceResource> {
         try {
             val created = apiService.addResource(resource)
+            resourceDao.insertResource(ResourceEntity.fromDomain(created))
             return Resource.Success(created)
         } catch (_: Exception) {}
-        MockDataStore.addResource(resource)
+        resourceDao.insertResource(ResourceEntity.fromDomain(resource))
         return Resource.Success(resource)
     }
 
     override suspend fun updateResource(resource: WorkspaceResource): Resource<WorkspaceResource> {
         try {
             val updated = apiService.updateResource(resource.id, resource)
+            resourceDao.updateResource(ResourceEntity.fromDomain(updated))
             return Resource.Success(updated)
         } catch (_: Exception) {}
-        MockDataStore.updateResource(resource)
+        resourceDao.updateResource(ResourceEntity.fromDomain(resource))
         return Resource.Success(resource)
     }
 
     override suspend fun deleteResource(id: String): Resource<Unit> {
         try {
             apiService.deleteResource(id)
-            return Resource.Success(Unit)
         } catch (_: Exception) {}
-        MockDataStore.deleteResource(id)
+        resourceDao.deleteResourceById(id)
         return Resource.Success(Unit)
     }
 }

@@ -17,6 +17,7 @@ import com.example.fspacebooking.data.local.entity.BookingEntity
 import com.example.fspacebooking.data.local.entity.ResourceEntity
 import com.example.fspacebooking.data.local.entity.TimeSlotEntity
 import com.example.fspacebooking.data.local.entity.UserEntity
+import com.example.fspacebooking.domain.model.BookingStatus
 import com.example.fspacebooking.domain.model.ResourceStatus
 import com.example.fspacebooking.domain.model.ResourceType
 import com.example.fspacebooking.domain.model.UserRole
@@ -53,7 +54,8 @@ abstract class FSpaceDatabase : RoomDatabase() {
             resourceDaoProvider: Provider<ResourceDao>,
             timeSlotDaoProvider: Provider<TimeSlotDao>,
             userDaoProvider: Provider<UserDao>,
-            auditLogDaoProvider: Provider<AuditLogDao>
+            auditLogDaoProvider: Provider<AuditLogDao>,
+            bookingDaoProvider: Provider<BookingDao>
         ): FSpaceDatabase {
             return Room.databaseBuilder(
                 context.applicationContext,
@@ -64,13 +66,14 @@ abstract class FSpaceDatabase : RoomDatabase() {
             .addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
-                    // Seed initial workspaces, time slots, users, and audit log catalog
+                    // Seed initial workspaces, time slots, users, bookings, and audit logs
                     scope.launch(Dispatchers.IO) {
                         seedInitialData(
                             resourceDaoProvider.get(), 
                             timeSlotDaoProvider.get(),
                             userDaoProvider.get(),
-                            auditLogDaoProvider.get()
+                            auditLogDaoProvider.get(),
+                            bookingDaoProvider.get()
                         )
                     }
                 }
@@ -81,9 +84,10 @@ abstract class FSpaceDatabase : RoomDatabase() {
             resourceDao: ResourceDao, 
             timeSlotDao: TimeSlotDao,
             userDao: UserDao,
-            auditLogDao: AuditLogDao
+            auditLogDao: AuditLogDao,
+            bookingDao: BookingDao
         ) {
-            // Seed Users (Admin, Normal Employee, Locked User, Warning User)
+            // Seed Users (Admin, Normal Employee, Locked User, Warning User, Monitored User)
             val users = listOf(
                 UserEntity(
                     id = "user_admin",
@@ -132,6 +136,18 @@ abstract class FSpaceDatabase : RoomDatabase() {
                     violations = 2,
                     userStatus = "CẢNH BÁO",
                     fsu = "FSU1.BU9"
+                ),
+                UserEntity(
+                    id = "user_lannt",
+                    username = "lannt",
+                    password = "password123",
+                    email = "lannt@fpt.com",
+                    name = "Nguyễn Thị Lan",
+                    role = UserRole.EMPLOYEE,
+                    employeeId = "EMP045",
+                    violations = 1,
+                    userStatus = "THEO DÕI",
+                    fsu = "FSU3.AUTOMOTIVE"
                 )
             )
             userDao.insertUsers(users)
@@ -323,6 +339,133 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 )
             )
             resourceDao.insertResources(spaces)
+
+            // Seed Initial Rich Bookings
+            val initialBookings = listOf(
+                BookingEntity(
+                    id = "b_1001",
+                    userId = "user_admin",
+                    username = "admin",
+                    resourceId = "res_4",
+                    timeSlotId = 1,
+                    date = "2026-10-20",
+                    status = BookingStatus.CHECKED_IN,
+                    purpose = "Họp chiến lược ban giám đốc quý 4",
+                    checkedInAt = "08:05:12",
+                    createdAt = "2026-10-19 09:00:00"
+                ),
+                BookingEntity(
+                    id = "b_1002",
+                    userId = "user_namtv",
+                    username = "employee",
+                    resourceId = "res_1",
+                    timeSlotId = 2,
+                    date = "2026-10-20",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Daily standup và demo sprint FPT Cloud",
+                    createdAt = "2026-10-19 14:20:00"
+                ),
+                BookingEntity(
+                    id = "b_1003",
+                    userId = "user_ducbt",
+                    username = "ducbt",
+                    resourceId = "res_2",
+                    timeSlotId = 1,
+                    date = "2026-10-20",
+                    status = BookingStatus.NO_SHOW,
+                    purpose = "Phỏng vấn ứng viên Senior AI Engineer",
+                    createdAt = "2026-10-18 10:15:00"
+                ),
+                BookingEntity(
+                    id = "b_1004",
+                    userId = "user_maitt",
+                    username = "mai.tt",
+                    resourceId = "res_6",
+                    timeSlotId = 3,
+                    date = "2026-10-20",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Làm việc tập trung dự án Banking FPT",
+                    createdAt = "2026-10-19 16:45:00"
+                ),
+                BookingEntity(
+                    id = "b_1005",
+                    userId = "user_namtv",
+                    username = "employee",
+                    resourceId = "res_7",
+                    timeSlotId = 4,
+                    date = "2026-10-20",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Code review trực tiếp cùng Tech Lead",
+                    createdAt = "2026-10-20 07:30:00"
+                ),
+                BookingEntity(
+                    id = "b_1006",
+                    userId = "user_admin",
+                    username = "admin",
+                    resourceId = "res_11",
+                    timeSlotId = 3,
+                    date = "2026-10-21",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Townhall toàn thể đơn vị FPT Software HCM",
+                    createdAt = "2026-10-15 11:00:00"
+                ),
+                BookingEntity(
+                    id = "b_1007",
+                    userId = "user_namtv",
+                    username = "employee",
+                    resourceId = "res_10",
+                    timeSlotId = 2,
+                    date = "2026-10-21",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Kiểm thử bo mạch IoT trên giàn test lab F-Town 3",
+                    createdAt = "2026-10-19 15:10:00"
+                ),
+                BookingEntity(
+                    id = "b_1008",
+                    userId = "user_ducbt",
+                    username = "ducbt",
+                    resourceId = "res_3",
+                    timeSlotId = 4,
+                    date = "2026-10-19",
+                    status = BookingStatus.NO_SHOW,
+                    purpose = "Sync nhanh tiến độ microservices",
+                    createdAt = "2026-10-18 17:00:00"
+                ),
+                BookingEntity(
+                    id = "b_1009",
+                    userId = "user_maitt",
+                    username = "mai.tt",
+                    resourceId = "res_12",
+                    timeSlotId = 1,
+                    date = "2026-10-21",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Cuộc gọi phỏng vấn khách hàng đối tác Nhật Bản",
+                    createdAt = "2026-10-20 08:00:00"
+                ),
+                BookingEntity(
+                    id = "b_1010",
+                    userId = "user_namtv",
+                    username = "employee",
+                    resourceId = "res_14",
+                    timeSlotId = 5,
+                    date = "2026-10-20",
+                    status = BookingStatus.CONFIRMED,
+                    purpose = "Retro cuối tuần BU2",
+                    createdAt = "2026-10-20 09:15:00"
+                ),
+                BookingEntity(
+                    id = "b_1011",
+                    userId = "user_admin",
+                    username = "admin",
+                    resourceId = "res_2",
+                    timeSlotId = 2,
+                    date = "2026-10-19",
+                    status = BookingStatus.CANCELLED,
+                    purpose = "Họp nhà cung cấp phần cứng",
+                    createdAt = "2026-10-18 08:30:00"
+                )
+            )
+            bookingDao.insertBookings(initialBookings)
         }
     }
 }

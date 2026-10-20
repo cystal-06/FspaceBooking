@@ -87,7 +87,8 @@ object DataModule {
         resourceDaoProvider: Provider<ResourceDao>,
         timeSlotDaoProvider: Provider<TimeSlotDao>,
         userDaoProvider: Provider<UserDao>,
-        auditLogDaoProvider: Provider<AuditLogDao>
+        auditLogDaoProvider: Provider<AuditLogDao>,
+        bookingDaoProvider: Provider<BookingDao>
     ): FSpaceDatabase {
         return FSpaceDatabase.buildDatabase(
             context,
@@ -95,7 +96,8 @@ object DataModule {
             resourceDaoProvider,
             timeSlotDaoProvider,
             userDaoProvider,
-            auditLogDaoProvider
+            auditLogDaoProvider,
+            bookingDaoProvider
         )
     }
 

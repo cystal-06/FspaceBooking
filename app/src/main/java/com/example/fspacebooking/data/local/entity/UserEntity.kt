@@ -3,6 +3,7 @@ package com.example.fspacebooking.data.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.fspacebooking.domain.model.User
 import com.example.fspacebooking.domain.model.UserRole
 
 @Entity(
@@ -26,4 +27,17 @@ data class UserEntity(
     val userStatus: String = "ĐANG HOẠT ĐỘNG", // "ĐANG HOẠT ĐỘNG", "CẢNH BÁO", "ĐÃ KHÓA"
     val fsu: String = "FSU1.BU2",
     val createdAt: String = System.currentTimeMillis().toString()
-)
+) {
+    fun toDomain(): User = User(
+        id = id,
+        username = username,
+        email = email,
+        name = name,
+        role = role,
+        employeeId = employeeId,
+        token = token ?: "session-token",
+        violations = violations,
+        userStatus = userStatus,
+        fsu = fsu
+    )
+}

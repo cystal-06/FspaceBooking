@@ -96,7 +96,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.fspacebooking.data.local.MockDataStore
+import com.example.fspacebooking.domain.model.TimeSlot
 import com.example.fspacebooking.domain.model.ResourceType
 import com.example.fspacebooking.domain.model.ResourceStatus
 import com.example.fspacebooking.domain.model.WorkspaceResource
@@ -466,7 +466,7 @@ fun ResourceSearchScreen(
                             val w = size.width
                             val h = size.height
 
-                            // Draw mock rooms partitions
+                            // Draw floor plan rooms partitions
                             drawRoundRect(
                                 color = Color(0xFF10B981).copy(alpha = 0.08f),
                                 topLeft = Offset(15f, 15f),
@@ -567,7 +567,7 @@ fun ResourceSearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(MockDataStore.timeSlots) { slot ->
+                        items(TimeSlot.DEFAULT_SLOTS) { slot ->
                             val isSel = selectedSheetSlotId == slot.id
                             Box(
                                 modifier = Modifier
@@ -604,29 +604,12 @@ fun ResourceSearchScreen(
                         )
 
                         FButton(
-                            text = "Xác nhận đặt",
+                            text = "Tiếp tục đặt",
                             onClick = {
                                 coroutineScope.launch {
-                                    val dateStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-                                    val slotId = selectedSheetSlotId ?: 1
-                                    
-                                    // Book the resource reactively
-                                    val success = MockDataStore.bookResource(
-                                        resourceId = resource.id,
-                                        date = dateStr,
-                                        timeSlotId = slotId,
-                                        userId = "admin_uid",
-                                        username = "admin_fspace"
-                                    ) != null
-
                                     sheetState.hide()
                                     showBottomSheet = false
-
-                                    if (success) {
-                                        snackbarHostState.showSnackbar("Đặt chỗ thành công!")
-                                    } else {
-                                        snackbarHostState.showSnackbar("Trùng lịch, không thể đặt phòng!")
-                                    }
+                                    onResourceSelect(resource.id)
                                 }
                             },
                             modifier = Modifier.weight(1.5f)

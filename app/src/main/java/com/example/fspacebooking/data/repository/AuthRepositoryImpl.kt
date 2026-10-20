@@ -14,6 +14,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,14 +56,16 @@ class AuthRepositoryImpl @Inject constructor(
             saveSessionUser(user)
             Resource.Success(user)
         } catch (e: Exception) {
-            // Fallback authorization: match with MockDataStore users or create fallback
-            val matchedUser = com.example.fspacebooking.data.local.MockDataStore.usersFlow.value.find {
-                it.username.equals(username.trim(), ignoreCase = true) ||
-                it.email.equals(username.trim(), ignoreCase = true) ||
-                it.employeeId.equals(username.trim(), ignoreCase = true)
-            }
+            // Fallback authorization: authenticate with SQLite Room database UserDao
+            val localUser = userDao.getUserByUsername(username.trim())
+                ?: userDao.getAllUsers().firstOrNull()?.find {
+                    it.email.equals(username.trim(), ignoreCase = true) ||
+                    it.employeeId.equals(username.trim(), ignoreCase = true)
+                }
 
-            val finalUser = matchedUser ?: run {
+            val finalUser = if (localUser != null) {
+                localUser.toDomain()
+            } else {
                 val role = if (username.contains("admin", ignoreCase = true)) {
                     UserRole.ADMIN
                 } else {
@@ -82,10 +85,18 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             }
 
-            com.example.fspacebooking.data.local.MockDataStore.addAuditLog(
-                "AUTH",
-                "Người dùng '${finalUser.name}' (${finalUser.employeeId}) đã đăng nhập vào hệ thống."
-            )
+            try {
+                auditLogDao.insertLog(
+                    AuditLogEntity(
+                        id = "log_${System.currentTimeMillis()}",
+                        timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date()),
+                        category = "AUTH",
+                        message = "Người dùng '${finalUser.name}' (${finalUser.employeeId}) đã đăng nhập vào hệ thống.",
+                        actorId = finalUser.id
+                    )
+                )
+            } catch (_: Exception) {}
+
             saveSessionUser(finalUser)
             Resource.Success(finalUser)
         }
@@ -100,8 +111,8 @@ class AuthRepositoryImpl @Inject constructor(
                     return@flow
                 }
             } catch (_: Exception) {}
-            com.example.fspacebooking.data.local.MockDataStore.usersFlow.collect {
-                emit(it)
+            userDao.getViolators().collect { list ->
+                emit(list.map { it.toDomain() })
             }
         }
     }
@@ -111,7 +122,6 @@ class AuthRepositoryImpl @Inject constructor(
             apiService.unlockUser(userId)
         } catch (_: Exception) {}
 
-        com.example.fspacebooking.data.local.MockDataStore.unlockUser(userId)
         try {
             userDao.resetViolations(userId)
             auditLogDao.insertLog(
@@ -132,7 +142,6 @@ class AuthRepositoryImpl @Inject constructor(
             apiService.lockUser(userId)
         } catch (_: Exception) {}
 
-        com.example.fspacebooking.data.local.MockDataStore.lockUser(userId)
         try {
             userDao.updateUserStatus(userId, "ĐÃ KHÓA", 3)
             auditLogDao.insertLog(
@@ -149,7 +158,6 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun sendWarningEmail(userId: String): Resource<Unit> {
-        com.example.fspacebooking.data.local.MockDataStore.sendWarningEmail(userId)
         try {
             auditLogDao.insertLog(
                 AuditLogEntity(

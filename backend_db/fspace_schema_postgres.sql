@@ -643,16 +643,21 @@ INSERT INTO amenities (amenity_id, amenity_code, amenity_name, icon_name, descri
 
 -- 7. Resources (Phòng họp & Chỗ ngồi)
 INSERT INTO resources (resource_id, resource_code, resource_name, resource_type, building_id, floor_id, capacity, status, description) VALUES
-('res_1', 'ROOM-GOSLING-FT3', 'Phòng họp Gosling', 'ROOM', 'BLD_FTOWN3', 'FLR_FT3_F3', 12, 'AVAILABLE', 'Phòng họp cao cấp trang bị đầy đủ màn hình TV, bảng viết, hệ thống mic họp trực tuyến chuyên nghiệp.'),
+('res_1', 'ROOM-GOSLING-FT3', 'Phòng họp Gosling', 'ROOM', 'BLD_FTOWN3', 'FLR_FT3_F3', 12, 'AVAILABLE', 'Phòng họp cao cấp trang bị đầy đủ màn hình TV 4K, bảng kính, hệ thống mic họp trực tuyến Polycom chuyên nghiệp.'),
 ('res_2', 'ROOM-TURING-FT1', 'Phòng họp Turing', 'ROOM', 'BLD_FTOWN1', 'FLR_FT1_F2', 8, 'AVAILABLE', 'Thích hợp cho các buổi thảo luận nhóm kỹ thuật (scrum meetings). Không gian khép kín, cách âm tốt.'),
 ('res_3', 'ROOM-LOVELACE-FT3', 'Phòng họp Lovelace', 'ROOM', 'BLD_FTOWN3', 'FLR_FT3_F2', 6, 'AVAILABLE', 'Không gian nhỏ ấm cúng cho các cuộc đối thoại 1-1 hoặc họp nhóm nhỏ. Có máy chiếu chất lượng cao.'),
-('res_4', 'LAB-RITCHIE-FT2', 'Phòng Lab Ritchie', 'ROOM', 'BLD_FTOWN2', 'FLR_FT2_F1', 15, 'AVAILABLE', 'Không gian nghiên cứu phát triển lớn phục vụ cho các dự án lab R&D. Thiết bị đầy đủ.'),
+('res_4', 'LAB-RITCHIE-FT2', 'Phòng Lab Ritchie', 'ROOM', 'BLD_FTOWN2', 'FLR_FT2_F1', 15, 'AVAILABLE', 'Không gian nghiên cứu phát triển lớn phục vụ cho các dự án lab R&D. Thiết bị kiểm thử đầy đủ.'),
 ('res_5', 'ROOM-HOPPER-FT1', 'Phòng họp Hopper', 'ROOM', 'BLD_FTOWN1', 'FLR_FT1_F1', 4, 'AVAILABLE', 'Phòng họp nhanh không cần đặt trước lâu. Tiện nghi cơ bản đáp ứng thảo luận nhanh.'),
-('res_6', 'DESK-A101-FT3', 'Bàn làm việc Desk-A101', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Chỗ ngồi làm việc cá nhân yên tĩnh, trang bị ghế công thái học thoải mái.'),
-('res_7', 'DESK-A102-FT3', 'Bàn làm việc Desk-A102', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Bàn làm việc cá nhân nhìn ra giếng trời, không gian thoáng đãng.'),
+('res_6', 'DESK-A101-FT3', 'Bàn làm việc Desk-A101', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Chỗ ngồi làm việc cá nhân yên tĩnh, trang bị ghế công thái học Herman Miller thoải mái.'),
+('res_7', 'DESK-A102-FT3', 'Bàn làm việc Desk-A102', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Bàn làm việc cá nhân nhìn ra giếng trời, không gian thoáng đãng đầy đủ ánh sáng tự nhiên.'),
 ('res_8', 'DESK-B201-FT1', 'Bàn làm việc Desk-B201', 'DESK', 'BLD_FTOWN1', 'FLR_FT1_F3', 1, 'AVAILABLE', 'Vị trí làm việc tập trung cao độ tại khu vực Silent Zone của F-Town 1.'),
-('res_9', 'DESK-C301-FT2', 'Bàn làm việc Desk-C301', 'DESK', 'BLD_FTOWN2', 'FLR_FT2_F2', 1, 'AVAILABLE', 'Bàn làm việc nâng hạ độ cao điện tử thông minh (Standing Desk).'),
-('res_10', 'BOOTH-1A-FT3', 'Phone Booth 1A', 'BOOTH', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Cabin cách âm tuyệt đối phục vụ phỏng vấn tuyển dụng hoặc trao đổi khách hàng.');
+('res_9', 'DESK-C301-FT2', 'Bàn làm việc Desk-C301', 'DESK', 'BLD_FTOWN2', 'FLR_FT2_F2', 1, 'AVAILABLE', 'Bàn làm việc nâng hạ độ cao điện tử thông minh (Standing Desk) trang bị màn hình ngoài 27 inch.'),
+('res_10', 'BOOTH-1A-FT3', 'Phone Booth 1A', 'BOOTH', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Cabin cách âm tuyệt đối phục vụ phỏng vấn tuyển dụng hoặc trao đổi khách hàng bảo mật.'),
+('res_11', 'HALL-DIJKSTRA-FT2', 'Hội trường Dijkstra', 'ROOM', 'BLD_FTOWN2', 'FLR_FT2_F1', 50, 'AVAILABLE', 'Hội trường đào tạo và thuyết trình quy mô lớn, hệ thống âm thanh vòm và 2 máy chiếu 4K.'),
+('res_12', 'BOOTH-1B-FT1', 'Phone Booth 1B', 'BOOTH', 'BLD_FTOWN1', 'FLR_FT1_F2', 1, 'AVAILABLE', 'Buồng điện thoại cách âm cạnh khu vực Pantry, yên tĩnh và riêng tư.'),
+('res_13', 'TEAM-ALPHA-FT2', 'Team Space Alpha', 'ROOM', 'BLD_FTOWN2', 'FLR_FT2_F2', 10, 'AVAILABLE', 'Phòng làm việc nhóm chuyên biệt dành cho các dự án Sprint cấp tốc, bảng trắng di động xung quanh.'),
+('res_14', 'DESK-A103-FT3', 'Bàn làm việc Desk-A103', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Bàn làm việc cá nhân khu vực mở kết nối nhanh với khu pantry và cà phê.'),
+('res_15', 'ROOM-KNUTH-FT3', 'Phòng họp Knuth', 'ROOM', 'BLD_FTOWN3', 'FLR_FT3_F2', 4, 'AVAILABLE', 'Phòng họp nhỏ phục vụ trao đổi chuyên môn, kết nối video conference độ trễ thấp.');
 
 -- 8. Resource Amenities Link
 INSERT INTO resource_amenities (resource_id, amenity_id, quantity) VALUES
@@ -665,7 +670,12 @@ INSERT INTO resource_amenities (resource_id, amenity_id, quantity) VALUES
 ('res_7', 1, 1), ('res_7', 6, 1), ('res_7', 7, 1),
 ('res_8', 1, 1), ('res_8', 6, 1), ('res_8', 7, 1),
 ('res_9', 1, 1), ('res_9', 6, 1), ('res_9', 7, 1),
-('res_10', 1, 1), ('res_10', 7, 1), ('res_10', 8, 1);
+('res_10', 1, 1), ('res_10', 7, 1), ('res_10', 8, 1),
+('res_11', 1, 1), ('res_11', 2, 2), ('res_11', 3, 1), ('res_11', 5, 2), ('res_11', 8, 1),
+('res_12', 1, 1), ('res_12', 7, 1), ('res_12', 8, 1),
+('res_13', 1, 1), ('res_13', 2, 1), ('res_13', 4, 2), ('res_13', 5, 1),
+('res_14', 1, 1), ('res_14', 6, 1), ('res_14', 7, 1),
+('res_15', 1, 1), ('res_15', 2, 1), ('res_15', 3, 1), ('res_15', 5, 1);
 
 -- 9. Time Slots
 INSERT INTO time_slots (slot_id, slot_code, start_time, end_time, slot_label) VALUES
@@ -675,18 +685,23 @@ INSERT INTO time_slots (slot_id, slot_code, start_time, end_time, slot_label) VA
 (4, 'SLOT_04', '15:00', '17:00', 'Khung giờ 4 (15:00 - 17:00)'),
 (5, 'SLOT_05', '18:00', '20:00', 'Khung giờ 5 (18:00 - 20:00)');
 
--- 10. Sample Bookings
+-- 10. Sample Bookings (Đa dạng trạng thái và người dùng)
 INSERT INTO bookings (booking_id, booking_code, user_id, resource_id, slot_id, booking_date, purpose, attendee_count, qr_code_hash, booking_status) VALUES
 ('BK-20261020-001', 'FSP-GOSLING-01', 'usr_namtv', 'res_1', 1, CURRENT_DATE, 'Họp Kick-off Dự án FPT Connected Vehicle', 8, encode(digest('QR_res_1_slot1', 'sha256'), 'hex'), 'CHECKED_IN'),
-('BK-20261020-002', 'FSP-TURING-02', 'usr_namtv', 'res_2', 3, CURRENT_DATE, 'Sprint Retrospective BU2', 6, encode(digest('QR_res_2_slot3', 'sha256'), 'hex'), 'CONFIRMED'),
-('BK-20261020-003', 'FSP-DESK-03', 'usr_namtv', 'res_6', 2, CURRENT_DATE, 'Làm việc tập trung phân tích kiến trúc', 1, encode(digest('QR_res_6_slot2', 'sha256'), 'hex'), 'CONFIRMED'),
-('BK-20261019-001', 'FSP-DUC-NOSHOW1', 'usr_ducbt', 'res_3', 2, CURRENT_DATE - 1, 'Họp kỹ thuật DX Platform', 4, encode(digest('QR_res_3_slot2', 'sha256'), 'hex'), 'NO_SHOW'),
+('BK-20261020-002', 'FSP-TURING-02', 'usr_namtv', 'res_2', 3, CURRENT_DATE, 'Sprint Retrospective BU2 - Đánh giá Sprint 24', 6, encode(digest('QR_res_2_slot3', 'sha256'), 'hex'), 'CONFIRMED'),
+('BK-20261020-003', 'FSP-DESK-03', 'usr_namtv', 'res_6', 2, CURRENT_DATE, 'Làm việc tập trung phân tích kiến trúc phần mềm', 1, encode(digest('QR_res_6_slot2', 'sha256'), 'hex'), 'CONFIRMED'),
+('BK-20261020-004', 'FSP-ALPHA-04', 'usr_namtv', 'res_13', 4, CURRENT_DATE, 'Workshop Kiến trúc Microservices cho team Dev', 10, encode(digest('QR_res_13_slot4', 'sha256'), 'hex'), 'CONFIRMED'),
+('BK-20261021-001', 'FSP-RITCHIE-05', 'usr_namtv', 'res_4', 2, CURRENT_DATE + 1, 'Kiểm thử tích hợp phần cứng cảm biến IoT trên xe', 12, encode(digest('QR_res_4_slot2', 'sha256'), 'hex'), 'CONFIRMED'),
+('BK-20261021-002', 'FSP-BOOTH-06', 'usr_linhdt', 'res_10', 1, CURRENT_DATE + 1, 'Phỏng vấn ứng viên Senior UI/UX Designer', 2, encode(digest('QR_res_10_slot1', 'sha256'), 'hex'), 'CONFIRMED'),
+('BK-20261022-001', 'FSP-DIJKSTRA-07', 'usr_admin', 'res_11', 3, CURRENT_DATE + 2, 'Town Hall toàn FSU: Tổng kết quý và định hướng công nghệ', 45, encode(digest('QR_res_11_slot3', 'sha256'), 'hex'), 'CONFIRMED'),
+('BK-20261019-001', 'FSP-DUC-NOSHOW1', 'usr_ducbt', 'res_3', 2, CURRENT_DATE - 1, 'Họp kỹ thuật DX Platform với khách hàng Nhật Bản', 4, encode(digest('QR_res_3_slot2', 'sha256'), 'hex'), 'NO_SHOW'),
 ('BK-20261018-001', 'FSP-DUC-NOSHOW2', 'usr_ducbt', 'res_1', 4, CURRENT_DATE - 2, 'Phỏng vấn ứng viên AI Engineer', 3, encode(digest('QR_res_1_slot4', 'sha256'), 'hex'), 'NO_SHOW'),
-('BK-20261017-001', 'FSP-MAI-NOSHOW1', 'usr_maitt', 'res_2', 1, CURRENT_DATE - 3, 'Họp phân công test suite', 5, encode(digest('QR_res_2_slot1', 'sha256'), 'hex'), 'NO_SHOW');
+('BK-20261017-001', 'FSP-MAI-NOSHOW1', 'usr_maitt', 'res_2', 1, CURRENT_DATE - 3, 'Họp phân công test suite tự động kiểm thử hiệu năng', 5, encode(digest('QR_res_2_slot1', 'sha256'), 'hex'), 'NO_SHOW'),
+('BK-20261016-001', 'FSP-NAM-CANCEL', 'usr_namtv', 'res_5', 5, CURRENT_DATE - 4, 'Họp đột xuất giải quyết sự cố server staging', 3, encode(digest('QR_res_5_slot5', 'sha256'), 'hex'), 'CANCELLED');
 
 -- 11. Sample Check-ins
 INSERT INTO check_ins (checkin_id, booking_id, checked_in_at, checkin_method, device_ip, is_valid, notes) VALUES
-('chk_001', 'BK-20261020-001', CURRENT_TIMESTAMP - INTERVAL '1 hour', 'QR_SCAN', '10.20.14.88', TRUE, 'Check-in thành công tại cửa phòng Gosling Tầng 3.');
+('chk_001', 'BK-20261020-001', CURRENT_TIMESTAMP - INTERVAL '1 hour', 'QR_SCAN', '10.20.14.88', TRUE, 'Check-in thành công tại cửa phòng Gosling Tầng 3 F-Town 3.');
 
 -- 12. Sample Violations (UC12)
 INSERT INTO violations (violation_id, user_id, booking_id, violation_type, violation_date, penalty_applied, is_resolved) VALUES
