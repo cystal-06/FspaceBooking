@@ -121,7 +121,7 @@ class BookingRepositoryImpl @Inject constructor(
                 status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
             )
             val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == timeSlotId }
-                ?: TimeSlot(timeSlotId, "08:00", "10:00", "Slot $timeSlotId")
+                ?: TimeSlot(timeSlotId, "08:00", "10:00", "Ca $timeSlotId")
             val newId = "b_${System.currentTimeMillis()}"
             val nowStr = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
@@ -211,7 +211,7 @@ class BookingRepositoryImpl @Inject constructor(
                         status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                     )
                 val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
-                    ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                    ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Ca ${entity.timeSlotId}")
                 try {
                     auditLogDao.insertLog(
                         AuditLogEntity(
@@ -311,7 +311,7 @@ class BookingRepositoryImpl @Inject constructor(
                             status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                         )
                     val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
-                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Ca ${entity.timeSlotId}")
                     Booking(
                         id = entity.id,
                         userId = entity.userId,
@@ -359,7 +359,7 @@ class BookingRepositoryImpl @Inject constructor(
                             status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                         )
                     val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
-                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Ca ${entity.timeSlotId}")
                     Booking(
                         id = entity.id,
                         userId = entity.userId,
@@ -401,7 +401,7 @@ class BookingRepositoryImpl @Inject constructor(
                             status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                         )
                     val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
-                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Slot ${entity.timeSlotId}")
+                        ?: TimeSlot(entity.timeSlotId, "08:00", "10:00", "Ca ${entity.timeSlotId}")
                     Booking(
                         id = entity.id,
                         userId = entity.userId,

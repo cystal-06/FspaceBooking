@@ -51,7 +51,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun login(username: String, password: String): Resource<User> = withContext(Dispatchers.IO) {
         if (username.isBlank() || password.isBlank()) {
-            return@withContext Resource.Error("Username and password cannot be empty")
+            return@withContext Resource.Error("Tên đăng nhập và mật khẩu không được để trống")
         }
 
         return@withContext try {

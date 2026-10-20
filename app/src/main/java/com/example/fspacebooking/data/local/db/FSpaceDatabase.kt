@@ -34,7 +34,7 @@ import javax.inject.Provider
         UserEntity::class,
         AuditLogEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -161,13 +161,13 @@ abstract class FSpaceDatabase : RoomDatabase() {
             )
             auditLogDao.insertLogs(initialLogs)
 
-            // Seed 5 Time slots
+            // Seed 5 Time slots (Ca 1 - Ca 5 chuẩn FPT)
             val slots = listOf(
-                TimeSlotEntity(1, "08:00", "10:00", "Slot 1"),
-                TimeSlotEntity(2, "10:00", "12:00", "Slot 2"),
-                TimeSlotEntity(3, "13:00", "15:00", "Slot 3"),
-                TimeSlotEntity(4, "15:00", "17:00", "Slot 4"),
-                TimeSlotEntity(5, "18:00", "20:00", "Slot 5")
+                TimeSlotEntity(1, "08:00", "10:00", "Ca 1 (08:00 - 10:00)"),
+                TimeSlotEntity(2, "10:00", "12:00", "Ca 2 (10:00 - 12:00)"),
+                TimeSlotEntity(3, "13:00", "15:00", "Ca 3 (13:00 - 15:00)"),
+                TimeSlotEntity(4, "15:00", "17:00", "Ca 4 (15:00 - 17:00)"),
+                TimeSlotEntity(5, "18:00", "20:00", "Ca 5 (18:00 - 20:00)")
             )
             timeSlotDao.insertTimeSlots(slots)
 
@@ -230,7 +230,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_6",
-                    name = "Bàn làm việc Desk A-101",
+                    name = "Bàn làm việc cá nhân A-101",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
@@ -241,7 +241,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_7",
-                    name = "Bàn làm việc Desk A-102",
+                    name = "Bàn làm việc cá nhân A-102",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
@@ -252,7 +252,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_8",
-                    name = "Bàn làm việc Desk B-201",
+                    name = "Bàn làm việc cá nhân B-201",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 2",
@@ -263,7 +263,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_9",
-                    name = "Bàn làm việc Desk C-301",
+                    name = "Bàn làm việc nâng hạ C-301",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 3",
@@ -274,7 +274,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_10",
-                    name = "Phòng Lab Ritchie (R&D)",
+                    name = "Phòng Lab Nghiên cứu Ritchie",
                     type = ResourceType.ROOM,
                     capacity = 15,
                     building = "F-Town 3",
@@ -296,7 +296,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_12",
-                    name = "Buồng điện thoại Phone Booth 1A",
+                    name = "Buồng điện thoại cách âm 1A",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
@@ -307,7 +307,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_13",
-                    name = "Buồng điện thoại Phone Booth 1B",
+                    name = "Buồng điện thoại cách âm 1B",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
@@ -329,7 +329,7 @@ abstract class FSpaceDatabase : RoomDatabase() {
                 ),
                 ResourceEntity(
                     id = "res_15",
-                    name = "Bàn làm việc yên tĩnh Silent S-01",
+                    name = "Bàn làm việc yên tĩnh S-01",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",

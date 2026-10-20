@@ -352,11 +352,11 @@ INSERT INTO resources (resource_id, resource_code, resource_name, resource_type,
 ('res_3', 'ROOM-LOVELACE-FT3', 'Phòng họp Lovelace', 'ROOM', 'BLD_FTOWN3', 'FLR_FT3_F2', 6, 'AVAILABLE', 'Không gian nhỏ ấm cúng cho các cuộc đối thoại 1-1 hoặc họp nhóm nhỏ. Có máy chiếu chất lượng cao.'),
 ('res_4', 'LAB-RITCHIE-FT2', 'Phòng Lab Ritchie', 'ROOM', 'BLD_FTOWN2', 'FLR_FT2_F1', 15, 'AVAILABLE', 'Không gian nghiên cứu phát triển lớn phục vụ cho các dự án lab R&D. Thiết bị đầy đủ.'),
 ('res_5', 'ROOM-HOPPER-FT1', 'Phòng họp Hopper', 'ROOM', 'BLD_FTOWN1', 'FLR_FT1_F1', 4, 'AVAILABLE', 'Phòng họp nhanh không cần đặt trước lâu. Tiện nghi cơ bản đáp ứng thảo luận nhanh.'),
-('res_6', 'DESK-A101-FT3', 'Bàn làm việc Desk-A101', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Chỗ ngồi làm việc cá nhân yên tĩnh, trang bị ghế công thái học thoải mái.'),
-('res_7', 'DESK-A102-FT3', 'Bàn làm việc Desk-A102', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Bàn làm việc cá nhân nhìn ra giếng trời, không gian thoáng đãng.'),
-('res_8', 'DESK-B201-FT1', 'Bàn làm việc Desk-B201', 'DESK', 'BLD_FTOWN1', 'FLR_FT1_F3', 1, 'AVAILABLE', 'Vị trí làm việc tập trung cao độ tại khu vực Silent Zone của F-Town 1.'),
-('res_9', 'DESK-C301-FT2', 'Bàn làm việc Desk-C301', 'DESK', 'BLD_FTOWN2', 'FLR_FT2_F2', 1, 'AVAILABLE', 'Bàn làm việc nâng hạ độ cao điện tử thông minh (Standing Desk).'),
-('res_10', 'BOOTH-1A-FT3', 'Phone Booth 1A', 'BOOTH', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Cabin cách âm tuyệt đối phục vụ phỏng vấn tuyển dụng hoặc trao đổi khách hàng.');
+('res_6', 'DESK-A101-FT3', 'Bàn làm việc cá nhân A-101', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Chỗ ngồi làm việc cá nhân yên tĩnh, trang bị ghế công thái học Herman Miller thoải mái.'),
+('res_7', 'DESK-A102-FT3', 'Bàn làm việc cá nhân A-102', 'DESK', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Bàn làm việc cá nhân nhìn ra giếng trời, không gian thoáng đãng đầy đủ ánh sáng tự nhiên.'),
+('res_8', 'DESK-B201-FT1', 'Bàn làm việc B-201', 'DESK', 'BLD_FTOWN1', 'FLR_FT1_F3', 1, 'AVAILABLE', 'Vị trí làm việc tập trung cao độ tại khu vực Silent Zone của F-Town 1.'),
+('res_9', 'DESK-C301-FT2', 'Bàn làm việc nâng hạ C-301', 'DESK', 'BLD_FTOWN2', 'FLR_FT2_F2', 1, 'AVAILABLE', 'Bàn làm việc nâng hạ độ cao điện tử thông minh (Standing Desk) trang bị màn hình ngoài 27 inch.'),
+('res_10', 'BOOTH-1A-FT3', 'Buồng điện thoại cách âm 1A', 'BOOTH', 'BLD_FTOWN3', 'FLR_FT3_F1', 1, 'AVAILABLE', 'Cabin cách âm tuyệt đối phục vụ phỏng vấn tuyển dụng hoặc trao đổi khách hàng bảo mật.');
 
 INSERT INTO resource_amenities (resource_id, amenity_id, quantity) VALUES
 ('res_1', 1, 1), ('res_1', 2, 1), ('res_1', 3, 1), ('res_1', 4, 1), ('res_1', 5, 1), ('res_1', 8, 1),
@@ -371,11 +371,11 @@ INSERT INTO resource_amenities (resource_id, amenity_id, quantity) VALUES
 ('res_10', 1, 1), ('res_10', 7, 1), ('res_10', 8, 1);
 
 INSERT INTO time_slots (slot_id, slot_code, start_time, end_time, slot_label) VALUES
-(1, 'SLOT_01', '08:00', '10:00', 'Khung giờ 1 (08:00 - 10:00)'),
-(2, 'SLOT_02', '10:00', '12:00', 'Khung giờ 2 (10:00 - 12:00)'),
-(3, 'SLOT_03', '13:00', '15:00', 'Khung giờ 3 (13:00 - 15:00)'),
-(4, 'SLOT_04', '15:00', '17:00', 'Khung giờ 4 (15:00 - 17:00)'),
-(5, 'SLOT_05', '18:00', '20:00', 'Khung giờ 5 (18:00 - 20:00)');
+(1, 'SLOT_01', '08:00', '10:00', 'Ca 1 (08:00 - 10:00)'),
+(2, 'SLOT_02', '10:00', '12:00', 'Ca 2 (10:00 - 12:00)'),
+(3, 'SLOT_03', '13:00', '15:00', 'Ca 3 (13:00 - 15:00)'),
+(4, 'SLOT_04', '15:00', '17:00', 'Ca 4 (15:00 - 17:00)'),
+(5, 'SLOT_05', '18:00', '20:00', 'Ca 5 (18:00 - 20:00)');
 
 INSERT INTO bookings (booking_id, booking_code, user_id, resource_id, slot_id, booking_date, purpose, attendee_count, qr_code_hash, booking_status) VALUES
 ('BK-20261020-001', 'FSP-GOSLING-01', 'usr_namtv', 'res_1', 1, CURRENT_DATE(), 'Họp Kick-off Dự án FPT Connected Vehicle', 8, SHA2('QR_res_1_slot1', 256), 'CHECKED_IN'),

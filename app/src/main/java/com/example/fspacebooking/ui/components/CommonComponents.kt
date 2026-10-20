@@ -358,7 +358,7 @@ fun BookingStatusBadge(
     val (dotColor, bgColor, label) = when (status) {
         BookingStatus.CONFIRMED -> Triple(FptEmerald, FptEmeraldLight, "Đã xác nhận")
         BookingStatus.CANCELLED -> Triple(FptRose, FptRoseLight, "Đã hủy")
-        BookingStatus.CHECKED_IN -> Triple(FptBlue, Color(0xFFEFF6FF), "Đã check-in")
+        BookingStatus.CHECKED_IN -> Triple(FptBlue, Color(0xFFEFF6FF), "Đã nhận chỗ")
         BookingStatus.NO_SHOW -> Triple(Color(0xFFDC2626), Color(0xFFFEE2E2), "Vắng mặt")
     }
 

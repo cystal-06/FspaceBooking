@@ -127,7 +127,6 @@ fun MyBookingsScreen(
         }
         list
     }
-    val sdfDayName = SimpleDateFormat("EEE", Locale.getDefault())
     val sdfDayNum = SimpleDateFormat("dd", Locale.getDefault())
 
     val primaryColor = Color(0xFF2563EB)
@@ -179,7 +178,17 @@ fun MyBookingsScreen(
                         items(calendarDays) { date ->
                             val dateStr = sdf.format(date)
                             val isSelected = dateStr == selectedCalendarDate
-                            val dayName = sdfDayName.format(date)
+                            val isToday = dateStr == sdf.format(Date())
+                            val dayName = if (isToday) "Hôm nay" else when (Calendar.getInstance().apply { time = date }.get(Calendar.DAY_OF_WEEK)) {
+                                Calendar.MONDAY -> "Th 2"
+                                Calendar.TUESDAY -> "Th 3"
+                                Calendar.WEDNESDAY -> "Th 4"
+                                Calendar.THURSDAY -> "Th 5"
+                                Calendar.FRIDAY -> "Th 6"
+                                Calendar.SATURDAY -> "Th 7"
+                                Calendar.SUNDAY -> "CN"
+                                else -> ""
+                            }
                             val dayNum = sdfDayNum.format(date)
 
                             val hasBooking = allBookings.any { it.date == dateStr && it.status == BookingStatus.CONFIRMED }
@@ -199,9 +208,9 @@ fun MyBookingsScreen(
                                     .padding(vertical = 12.dp)
                             ) {
                                 Text(
-                                    text = dayName.uppercase(),
+                                    text = dayName,
                                     color = if (isSelected) Color.White.copy(alpha = 0.8f) else AppTextMuted,
-                                    fontSize = 11.sp,
+                                    fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -686,7 +695,7 @@ fun BookingAgendaCard(
                             ) {
                                 Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = FptEmerald, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("Đã Check-in", fontSize = 12.sp, color = FptEmerald, fontWeight = FontWeight.Bold)
+                                Text("Đã nhận chỗ", fontSize = 12.sp, color = FptEmerald, fontWeight = FontWeight.Bold)
                             }
                         } else {
                             Box(
@@ -699,7 +708,7 @@ fun BookingAgendaCard(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(imageVector = Icons.Default.QrCodeScanner, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Check-in QR", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Text("Quét QR nhận chỗ", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
                         }

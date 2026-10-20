@@ -140,7 +140,7 @@ fun StatisticsScreen(
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
                                         Text(
-                                            text = "Gosling Boardroom (F-Town 3)",
+                                            text = "Phòng họp Hội đồng Gosling (F-Town 3)",
                                             fontWeight = FontWeight.ExtraBold,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = AdminTextPrimary
@@ -175,9 +175,9 @@ fun StatisticsScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                    BuildingStatRow(buildingName = "F-Town 1 Campus", rate = 72f, progressColor = AdminPrimary)
-                                    BuildingStatRow(buildingName = "F-Town 2 Campus", rate = 45f, progressColor = AdminSecondary)
-                                    BuildingStatRow(buildingName = "F-Town 3 Campus", rate = 88f, progressColor = AdminAccent)
+                                    BuildingStatRow(buildingName = "Tòa nhà F-Town 1", rate = 72f, progressColor = AdminPrimary)
+                                    BuildingStatRow(buildingName = "Tòa nhà F-Town 2", rate = 45f, progressColor = AdminSecondary)
+                                    BuildingStatRow(buildingName = "Tòa nhà F-Town 3", rate = 88f, progressColor = AdminAccent)
                                 }
                             }
                         }
