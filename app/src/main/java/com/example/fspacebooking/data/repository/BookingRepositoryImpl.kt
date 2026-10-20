@@ -117,7 +117,7 @@ class BookingRepositoryImpl @Inject constructor(
                 type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
                 capacity = 6,
                 building = "F-Town 1",
-                floor = "Floor 2",
+                floor = "Tầng 2",
                 status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
             )
             val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == timeSlotId }
@@ -207,7 +207,7 @@ class BookingRepositoryImpl @Inject constructor(
                         type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
                         capacity = 6,
                         building = "F-Town 1",
-                        floor = "Floor 2",
+                        floor = "Tầng 2",
                         status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                     )
                 val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
@@ -307,7 +307,7 @@ class BookingRepositoryImpl @Inject constructor(
                             type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
                             capacity = 6,
                             building = "F-Town 1",
-                            floor = "Floor 2",
+                            floor = "Tầng 2",
                             status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                         )
                     val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
@@ -355,7 +355,7 @@ class BookingRepositoryImpl @Inject constructor(
                             type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
                             capacity = 6,
                             building = "F-Town 1",
-                            floor = "Floor 2",
+                            floor = "Tầng 2",
                             status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                         )
                     val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }
@@ -397,7 +397,7 @@ class BookingRepositoryImpl @Inject constructor(
                             type = com.example.fspacebooking.domain.model.ResourceType.ROOM,
                             capacity = 6,
                             building = "F-Town 1",
-                            floor = "Floor 2",
+                            floor = "Tầng 2",
                             status = com.example.fspacebooking.domain.model.ResourceStatus.BOOKED
                         )
                     val slot = TimeSlot.DEFAULT_SLOTS.find { it.id == entity.timeSlotId }

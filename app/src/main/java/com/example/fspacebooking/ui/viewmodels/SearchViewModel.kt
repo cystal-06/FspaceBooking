@@ -57,8 +57,8 @@ class SearchViewModel @Inject constructor(
         _selectedCapacity,
         _searchQuery
     ) { type, building, floor, capacity, query ->
-        val b = if (building == "All Buildings" || building.isNullOrBlank()) null else building
-        val f = if (floor == "All Floors" || floor.isNullOrBlank()) null else floor
+        val b = if (building == "All Buildings" || building == "Tất cả tòa nhà" || building.isNullOrBlank()) null else building
+        val f = if (floor == "All Floors" || floor == "Tất cả các tầng" || floor == "Tất cả tầng" || floor.isNullOrBlank()) null else floor
         Triple(type, b, f) to Pair(capacity, query)
     }.flatMapLatest { pair ->
         val type = pair.first.first

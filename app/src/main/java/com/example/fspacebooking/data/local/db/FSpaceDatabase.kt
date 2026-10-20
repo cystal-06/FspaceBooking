@@ -34,7 +34,7 @@ import javax.inject.Provider
         UserEntity::class,
         AuditLogEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -171,172 +171,172 @@ abstract class FSpaceDatabase : RoomDatabase() {
             )
             timeSlotDao.insertTimeSlots(slots)
 
-            // Seed 15 Workspaces
+            // Seed 15 Workspaces (100% Tiếng Việt chuẩn FPT Campus)
             val spaces = listOf(
                 ResourceEntity(
                     id = "res_1",
-                    name = "Lovelace Room",
+                    name = "Phòng họp Lovelace",
                     type = ResourceType.ROOM,
                     capacity = 12,
                     building = "F-Town 1",
-                    floor = "Floor 2",
+                    floor = "Tầng 2",
                     status = ResourceStatus.AVAILABLE,
-                    description = "High-end video conference meeting room equipped with dual screens, sound system, and whiteboards.",
-                    amenities = listOf("Projector", "Video Conference", "Whiteboard", "High-speed Wi-Fi")
+                    description = "Phòng họp hội nghị truyền hình cao cấp trang bị 2 màn hình lớn, hệ thống âm thanh Polycom và bảng kính.",
+                    amenities = listOf("Máy chiếu 4K", "Họp trực tuyến", "Bảng kính", "Wifi 6")
                 ),
                 ResourceEntity(
                     id = "res_2",
-                    name = "Turing Room",
+                    name = "Phòng họp Turing",
                     type = ResourceType.ROOM,
                     capacity = 8,
                     building = "F-Town 1",
-                    floor = "Floor 3",
+                    floor = "Tầng 3",
                     status = ResourceStatus.BOOKED,
-                    description = "Medium-sized meeting room suitable for sprint planning and collaborative work.",
-                    amenities = listOf("TV Screen", "Whiteboard", "High-speed Wi-Fi")
+                    description = "Phòng họp quy mô vừa thích hợp cho các buổi họp Sprint Planning và thảo luận nhóm kỹ thuật.",
+                    amenities = listOf("Màn hình TV 65\"", "Bảng trắng", "Wifi 6")
                 ),
                 ResourceEntity(
                     id = "res_3",
-                    name = "Hopper Room",
+                    name = "Phòng họp Hopper",
                     type = ResourceType.ROOM,
                     capacity = 6,
                     building = "F-Town 2",
-                    floor = "Floor 1",
+                    floor = "Tầng 1",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Cozy huddle room perfect for quick syncs and brainstorming sessions.",
-                    amenities = listOf("Whiteboard", "TV Screen")
+                    description = "Phòng họp nhanh ấm cúng cho các cuộc đối thoại 1-1 hoặc họp nhóm nhỏ. Có máy chiếu chất lượng cao.",
+                    amenities = listOf("Bảng trắng", "Màn hình TV", "Wifi 6")
                 ),
                 ResourceEntity(
                     id = "res_4",
-                    name = "Gosling Boardroom",
+                    name = "Phòng họp Hội đồng Gosling",
                     type = ResourceType.ROOM,
                     capacity = 25,
                     building = "F-Town 3",
-                    floor = "Floor 5",
+                    floor = "Tầng 5",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Executive boardroom with premium seating, advanced audio-visual routing, and spectacular views.",
-                    amenities = listOf("Projector", "Video Conference", "Sound System", "Whiteboard", "Coffee Machine")
+                    description = "Phòng họp hội đồng cao cấp với bàn ghế da sang trọng, hệ thống nghe nhìn hiện đại và tầm nhìn toàn cảnh Campus.",
+                    amenities = listOf("Máy chiếu 4K", "Họp trực tuyến", "Âm thanh hội nghị", "Bảng kính", "Máy pha cà phê")
                 ),
                 ResourceEntity(
                     id = "res_5",
-                    name = "Knuth Room",
+                    name = "Phòng họp Knuth",
                     type = ResourceType.ROOM,
                     capacity = 4,
                     building = "F-Town 3",
-                    floor = "Floor 2",
+                    floor = "Tầng 2",
                     status = ResourceStatus.MAINTENANCE,
-                    description = "Small interview and consultation room. Currently undergoing network maintenance.",
-                    amenities = listOf("Whiteboard", "High-speed Wi-Fi")
+                    description = "Phòng họp nhỏ phỏng vấn và trao đổi chuyên môn. Hiện đang bảo trì hệ thống mạng nội bộ.",
+                    amenities = listOf("Bảng trắng", "Wifi 6")
                 ),
                 ResourceEntity(
                     id = "res_6",
-                    name = "Hot Desk A-101",
+                    name = "Bàn làm việc Desk A-101",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
-                    floor = "Floor 1",
+                    floor = "Tầng 1",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Standard hot desk with ergonomic chair, USB charging hub, and a 27-inch external monitor.",
-                    amenities = listOf("Ergonomic Chair", "External Monitor", "USB-C Hub")
+                    description = "Bàn làm việc cá nhân tiêu chuẩn trang bị ghế công thái học Herman Miller, cổng sạc USB-C và màn hình ngoài 27 inch.",
+                    amenities = listOf("Ghế công thái học", "Màn hình ngoài 27\"", "Cổng sạc USB-C")
                 ),
                 ResourceEntity(
                     id = "res_7",
-                    name = "Hot Desk A-102",
+                    name = "Bàn làm việc Desk A-102",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
-                    floor = "Floor 1",
+                    floor = "Tầng 1",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Standard hot desk next to window. Ergonomic layout.",
-                    amenities = listOf("Ergonomic Chair", "External Monitor", "USB-C Hub")
+                    description = "Bàn làm việc cá nhân cạnh cửa sổ thoáng đãng, đón ánh sáng tự nhiên, ghế công thái học êm ái.",
+                    amenities = listOf("Ghế công thái học", "Màn hình ngoài", "Cổng sạc USB-C")
                 ),
                 ResourceEntity(
                     id = "res_8",
-                    name = "Hot Desk B-201",
+                    name = "Bàn làm việc Desk B-201",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 2",
-                    floor = "Floor 2",
+                    floor = "Tầng 2",
                     status = ResourceStatus.BOOKED,
-                    description = "Premium workspace desk located in a quiet developer zone.",
-                    amenities = listOf("Ergonomic Chair", "External Monitor", "Mechanical Keyboard")
+                    description = "Bàn làm việc cá nhân tại khu vực Silent Zone yên tĩnh của F-Town 2, thích hợp lập trình tập trung cao độ.",
+                    amenities = listOf("Ghế công thái học", "Màn hình ngoài", "Bàn phím cơ")
                 ),
                 ResourceEntity(
                     id = "res_9",
-                    name = "Hot Desk C-301",
+                    name = "Bàn làm việc Desk C-301",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 3",
-                    floor = "Floor 3",
+                    floor = "Tầng 3",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Dual-monitor developer station with height-adjustable standing desk.",
-                    amenities = listOf("Standing Desk", "Dual Monitors", "USB-C Hub")
+                    description = "Trạm làm việc lập trình viên trang bị bàn nâng hạ điện tử (Standing Desk) và 2 màn hình 4K.",
+                    amenities = listOf("Bàn nâng hạ thông minh", "2 Màn hình 4K", "Cổng sạc USB-C")
                 ),
                 ResourceEntity(
                     id = "res_10",
-                    name = "Ritchie Lab",
+                    name = "Phòng Lab Ritchie (R&D)",
                     type = ResourceType.ROOM,
                     capacity = 15,
                     building = "F-Town 3",
-                    floor = "Floor 4",
+                    floor = "Tầng 4",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Hardware validation testing laboratory with professional equipment and isolated power rings.",
-                    amenities = listOf("AC Isolated Rings", "Whiteboard", "High-speed Wi-Fi", "Soldering Ventilation")
+                    description = "Phòng Lab nghiên cứu và kiểm thử phần cứng IoT/Automotive với nguồn điện cách ly chuyên nghiệp.",
+                    amenities = listOf("Nguồn điện cách ly", "Bảng trắng", "Wifi 6", "Hệ thống thông gió")
                 ),
                 ResourceEntity(
                     id = "res_11",
-                    name = "Dijkstra Auditoria",
+                    name = "Hội trường Dijkstra",
                     type = ResourceType.ROOM,
                     capacity = 50,
                     building = "F-Town 2",
-                    floor = "Floor 5",
+                    floor = "Tầng 5",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Spacious training hall with visual stage routing, dual 4K projectors, and surround sound.",
-                    amenities = listOf("Dual Projector", "Stage Sound System", "Whiteboard", "Capacity Seating")
+                    description = "Hội trường đào tạo và hội thảo lớn với sân khấu thuyết trình, 2 máy chiếu 4K và âm thanh vòm.",
+                    amenities = listOf("2 Máy chiếu 4K", "Âm thanh sân khấu", "Bảng trắng", "Ghế hội trường")
                 ),
                 ResourceEntity(
                     id = "res_12",
-                    name = "Phone Booth 1A",
+                    name = "Buồng điện thoại Phone Booth 1A",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
-                    floor = "Floor 2",
+                    floor = "Tầng 2",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Sound-insulated telephone booth for confidential business calls and private virtual meetings.",
-                    amenities = listOf("Acoustic Foam", "Desk Lamp", "Power Outlet", "High-speed Wi-Fi")
+                    description = "Buồng cách âm tuyệt đối phục vụ các cuộc gọi công việc bảo mật hoặc phỏng vấn trực tuyến.",
+                    amenities = listOf("Vách cách âm", "Đèn bàn", "Ổ cắm đa năng", "Wifi 6")
                 ),
                 ResourceEntity(
                     id = "res_13",
-                    name = "Phone Booth 1B",
+                    name = "Buồng điện thoại Phone Booth 1B",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
-                    floor = "Floor 2",
+                    floor = "Tầng 2",
                     status = ResourceStatus.BOOKED,
-                    description = "Sound-insulated booth next to the coffee station. Quiet zone.",
-                    amenities = listOf("Acoustic Foam", "Desk Lamp", "Power Outlet")
+                    description = "Buồng cách âm riêng tư gần khu vực Pantry cà phê, yên tĩnh và thoải mái.",
+                    amenities = listOf("Vách cách âm", "Đèn bàn", "Ổ cắm đa năng")
                 ),
                 ResourceEntity(
                     id = "res_14",
-                    name = "Team Space Alpha",
+                    name = "Phòng làm việc nhóm Alpha",
                     type = ResourceType.ROOM,
                     capacity = 10,
                     building = "F-Town 2",
-                    floor = "Floor 3",
+                    floor = "Tầng 3",
                     status = ResourceStatus.AVAILABLE,
-                    description = "Dedicated scrum room with smart display interfaces, post-it panels, and rolling whiteboards.",
-                    amenities = listOf("Smart Display", "Whiteboard", "High-speed Wi-Fi")
+                    description = "Không gian làm việc nhóm chuyên biệt cho dự án Sprint, trang bị màn hình thông minh và bảng trắng di động.",
+                    amenities = listOf("Màn hình tương tác", "Bảng trắng", "Wifi 6")
                 ),
                 ResourceEntity(
                     id = "res_15",
-                    name = "Silent Space S-01",
+                    name = "Bàn làm việc yên tĩnh Silent S-01",
                     type = ResourceType.DESK,
                     capacity = 1,
                     building = "F-Town 1",
-                    floor = "Floor 3",
+                    floor = "Tầng 3",
                     status = ResourceStatus.AVAILABLE,
-                    description = "High-concentration silent zone desk featuring acoustic dividers, desk lamp, and ergonomic seating.",
-                    amenities = listOf("Noise Partition", "Ergonomic Chair", "Desk Lamp")
+                    description = "Bàn làm việc cá nhân tập trung cao độ với vách ngăn tiêu âm, đèn bàn chống mỏi mắt và ghế công thái học.",
+                    amenities = listOf("Vách ngăn tiêu âm", "Ghế công thái học", "Đèn bàn")
                 )
             )
             resourceDao.insertResources(spaces)

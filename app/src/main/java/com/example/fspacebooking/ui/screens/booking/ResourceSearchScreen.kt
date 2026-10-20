@@ -408,7 +408,7 @@ fun ResourceSearchScreen(
                             list = list.filter { item -> item.amenities.any { it.contains("Projector", ignoreCase = true) || it.contains("chiếu", ignoreCase = true) } }
                         }
                         if (needWhiteboard) {
-                            list = list.filter { item -> item.amenities.any { it.contains("Whiteboard", ignoreCase = true) || it.contains("trắng", ignoreCase = true) } }
+                            list = list.filter { item -> item.amenities.any { it.contains("Whiteboard", ignoreCase = true) || it.contains("trắng", ignoreCase = true) || it.contains("kính", ignoreCase = true) || it.contains("bảng", ignoreCase = true) } }
                         }
 
                         if (list.isEmpty()) {
