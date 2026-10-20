@@ -1181,7 +1181,64 @@
             }
         }
 
-        function toggleLockAccount(index, shouldLock) {
+        async function loadLiveBackendData() {
+            try {
+                const [resResp, usersResp, bookingsResp] = await Promise.all([
+                    fetch('/api/resources').then(r => r.ok ? r.json() : null).catch(() => null),
+                    fetch('/api/admin/violators').then(r => r.ok ? r.json() : null).catch(() => null),
+                    fetch('/api/bookings').then(r => r.ok ? r.json() : null).catch(() => null)
+                ]);
+
+                if (resResp && Array.isArray(resResp) && resResp.length > 0) {
+                    spacesData = resResp.map(r => ({
+                        id: r.id,
+                        name: r.name,
+                        type: r.type === 'ROOM' ? 'PHÒNG HỌP' : 'BÀN LÀM VIỆC',
+                        building: r.building,
+                        floor: r.floor,
+                        capacity: r.capacity,
+                        status: r.status === 'AVAILABLE' ? 'Trống' : r.status === 'BOOKED' ? 'Đã đặt' : 'Bảo trì'
+                    }));
+                    renderSpacesTable();
+                }
+
+                if (usersResp && Array.isArray(usersResp) && usersResp.length > 0) {
+                    accountsData = usersResp.map(u => ({
+                        id: u.employeeId || u.id,
+                        userId: u.id,
+                        name: u.name,
+                        email: u.email,
+                        fsu: u.fsu || 'FSU1.BU2',
+                        violations: u.violations || 0,
+                        status: u.userStatus === 'ĐÃ KHÓA' ? 'Bị khóa' : u.userStatus === 'CẢNH BÁO' ? 'Cảnh cáo' : 'Đang hoạt động'
+                    }));
+                    renderAccountsTable();
+                }
+
+                if (bookingsResp && Array.isArray(bookingsResp) && bookingsResp.length > 0) {
+                    bookingsData = bookingsResp.map(b => ({
+                        id: b.id,
+                        user: b.username || 'FPT Employee',
+                        resource: b.resource?.name || 'Tài nguyên',
+                        location: `${b.resource?.building || 'F-Town'} • ${b.resource?.floor || 'Tầng 1'}`,
+                        slot: `${b.timeSlot?.startTime || '08:00'} - ${b.timeSlot?.endTime || '10:00'}`,
+                        date: b.date,
+                        status: b.status === 'CONFIRMED' || b.status === 'CHECKED_IN' ? 'Hoạt động' : b.status === 'CANCELLED' ? 'Đã hủy' : 'Vắng mặt (No-Show)'
+                    }));
+                    renderBookingsTable();
+                }
+            } catch (err) {
+                console.warn('API sync warning:', err);
+            }
+        }
+
+        async function toggleLockAccount(index, shouldLock) {
+            const acc = accountsData[index];
+            if (acc && acc.userId) {
+                try {
+                    await fetch(`/api/admin/users/${acc.userId}/${shouldLock ? 'lock' : 'unlock'}`, { method: 'POST' });
+                } catch (_) {}
+            }
             if (shouldLock) {
                 accountsData[index].status = "Bị khóa";
                 accountsData[index].violations = 3;
@@ -1197,6 +1254,7 @@
             renderSpacesTable();
             renderAccountsTable();
             renderBookingsTable();
+            loadLiveBackendData();
         }
     </script>
 </body>
