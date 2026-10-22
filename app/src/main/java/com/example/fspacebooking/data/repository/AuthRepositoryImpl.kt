@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import com.example.fspacebooking.data.local.dao.AuditLogDao
 import com.example.fspacebooking.data.local.dao.UserDao
 import com.example.fspacebooking.data.local.entity.AuditLogEntity
+import com.example.fspacebooking.data.local.entity.UserEntity
 import com.example.fspacebooking.data.remote.api.FSpaceApiService
 import com.example.fspacebooking.data.remote.api.LoginRequest
 import com.example.fspacebooking.domain.model.User
@@ -87,6 +88,12 @@ class AuthRepositoryImpl @Inject constructor(
                     userStatus = "ĐANG HOẠT ĐỘNG",
                     fsu = "FSU1.BU2"
                 )
+            }
+
+            if (localUser == null) {
+                try {
+                    userDao.insertUsers(listOf(UserEntity.fromDomain(finalUser)))
+                } catch (_: Exception) {}
             }
 
             try {

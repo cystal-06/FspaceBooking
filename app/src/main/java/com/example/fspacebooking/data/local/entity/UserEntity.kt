@@ -38,6 +38,22 @@ data class UserEntity(
         token = token ?: "session-token",
         violations = violations,
         userStatus = userStatus,
-        fsu = fsu
     )
+
+    companion object {
+        fun fromDomain(domain: User): UserEntity {
+            return UserEntity(
+                id = domain.id,
+                username = domain.username,
+                email = domain.email,
+                name = domain.name,
+                role = domain.role,
+                employeeId = domain.employeeId,
+                token = domain.token,
+                violations = domain.violations,
+                userStatus = domain.userStatus,
+                fsu = domain.fsu
+            )
+        }
+    }
 }
